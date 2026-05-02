@@ -1,19 +1,20 @@
-import { config } from 'dotenv';
 import { NestFactory } from '@nestjs/core';
+import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { environment, Environment } from './config/environment';
-
-const envFile = process.env.ENV_FILE || `.envs/.${process.env.NODE_ENV || Environment.Development}`;
-config({ path: envFile });
+import { Environment } from './config/environment';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
-  if (environment.enableSwagger) {
+  const enableSwagger = configService.get<boolean>('environment.enableSwagger') ?? true;
+  const port = configService.get<number>('environment.port') ?? 3000;
+
+  if (enableSwagger) {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('API Documentation')
       .setDescription('API description')
@@ -23,6 +24,6 @@ async function bootstrap() {
     SwaggerModule.setup('api', app, document);
   }
 
-  await app.listen(environment.port);
+  await app.listen(port);
 }
 bootstrap();
