@@ -1,17 +1,11 @@
 import { registerAs } from '@nestjs/config';
 import { plainToClass } from 'class-transformer';
-import { IEnvironmentConfig } from './environment';
-
-export enum Environment {
-  Development = 'development',
-  Staging = 'staging',
-  Production = 'production',
-}
+import { Environment, IEnvironmentConfig } from './environment';
 
 class EnvironmentVariables {
   NODE_ENV!: string;
-  ENABLE_SWAGGER!: boolean;
-  PORT!: number;
+  ENABLE_SWAGGER!: string;
+  PORT!: string;
 }
 
 export const configuration = registerAs('environment', (): IEnvironmentConfig => {
@@ -23,20 +17,13 @@ export const configuration = registerAs('environment', (): IEnvironmentConfig =>
 
   const envVars = plainToClass(EnvironmentVariables, {
     NODE_ENV: process.env.NODE_ENV,
-    ENABLE_SWAGGER: process.env.ENABLE_SWAGGER === 'true',
-    PORT: parseInt(process.env.PORT || '3000', 10),
+    ENABLE_SWAGGER: process.env.ENABLE_SWAGGER,
+    PORT: process.env.PORT,
   });
-
-  let enableSwagger: boolean;
-  if (typeof envVars.ENABLE_SWAGGER === 'boolean') {
-    enableSwagger = envVars.ENABLE_SWAGGER;
-  } else {
-    enableSwagger = process.env.ENABLE_SWAGGER === 'true';
-  }
 
   return {
     nodeEnv,
-    enableSwagger,
-    port: envVars.PORT,
+    enableSwagger: envVars.ENABLE_SWAGGER === 'true',
+    port: parseInt(envVars.PORT, 10) || 3000,
   };
 });

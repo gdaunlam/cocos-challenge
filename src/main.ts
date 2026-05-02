@@ -1,20 +1,18 @@
 import { NestFactory } from '@nestjs/core';
-import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { Environment } from './config/environment';
+import { IEnvironmentConfig } from './config/environment';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+  const env = configService.get<IEnvironmentConfig>('environment')!;
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
-  const enableSwagger = configService.get<boolean>('environment.enableSwagger') ?? true;
-  const port = configService.get<number>('environment.port') ?? 3000;
-
-  if (enableSwagger) {
+  if (env.enableSwagger) {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('API Documentation')
       .setDescription('API description')
@@ -24,6 +22,6 @@ async function bootstrap() {
     SwaggerModule.setup('api', app, document);
   }
 
-  await app.listen(port);
+  await app.listen(env.port);
 }
 bootstrap();

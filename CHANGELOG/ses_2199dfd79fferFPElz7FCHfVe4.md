@@ -1,21 +1,18 @@
-# Session: ses_2199dfd79fferFPElz7FCHfVe4
-
-**Title:** CRUD para instrumentos de mercado
-**Date:** 2026-05-01T23:11:16.102Z
+---
+session_id: ses_2199dfd79fferFPElz7FCHfVe4
+date: 2026-05-02T18:34:00.000Z
+title: Remove AppConfigService wrapper
+---
 
 ## Summary
-
-Implemented a complete CRUD for market instruments management in a NestJS application. The session covered structuring the module under a `domain` directory, adding mandatory fields (emissionDate, amount), organizing controller code with separate request/response interfaces, and integrating class-validator for typed validation.
+Eliminated `AppConfigService` class that only existed for typing. Now using `ConfigService` directly with proper generic type `IEnvironmentConfig`.
 
 ## Key Changes
+| File | Change |
+|------|--------|
+| src/config/config.service.ts | Deleted |
+| src/main.ts | Uses `ConfigService.get<IEnvironmentConfig>('environment')` directly |
+| src/app.module.ts | Removed `AppConfigService` from providers array |
 
-- Created `data/market-instruments.json` with initial instruments array (USD, ARS, BTC, MELI)
-- Created market instruments module under `src/domain/` directory
-- Added `Instrument` interface with `name`, `emissionDate`, and `amount` fields
-- Created request DTO (`CreateInstrumentRequest`) with class-validator decorators for validation
-- Created response interface (`InstrumentResponse`) for standardized API responses
-- Moved controller to `src/domain/instruments/controller/` with separate request/response files
-- Set up CRUD endpoints (create, read, update, delete) for market instruments
-- Integrated class-validator and class-transformer for request validation
-- Configured Swagger documentation with ApiProperty decorators on interfaces
-- Resolved architecture issues where repository was incorrectly accessible from controller
+## Related
+Previously `AppConfigService` was a wrapper class with `OnModuleInit` validation. Now typed config is achieved through generic parameter on `ConfigService.get<T>()`.
