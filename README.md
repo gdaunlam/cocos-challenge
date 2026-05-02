@@ -1,4 +1,6 @@
 swagger
+    desactivarlo en production
+nodemon en development
 validación de endpoints
     datos de entrada en body
     query params
@@ -54,3 +56,4 @@ documentación
     readmes de desiciones
     diagrama
     colección de postman
+    actualizar swagger

@@ -1,0 +1,22 @@
+[
+  {
+    "name": "USD",
+    "emissionDate": "2024-01-01",
+    "amount": 1000000
+  },
+  {
+    "name": "ARS",
+    "emissionDate": "2024-01-01",
+    "amount": 5000000
+  },
+  {
+    "name": "BTC",
+    "emissionDate": "2024-01-01",
+    "amount": 100
+  },
+  {
+    "name": "MELI",
+    "emissionDate": "2024-01-01",
+    "amount": 50000
+  }
+]
