@@ -44,8 +44,6 @@ segurización
     helmet
     csrf
     content security policy
-build
-    diferido para prod
 requerimiento
     aplicación
     casos de uso
