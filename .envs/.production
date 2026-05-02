@@ -1,0 +1,3 @@
+ENABLE_SWAGGER=false
+NODE_ENV=production
+PORT=3000

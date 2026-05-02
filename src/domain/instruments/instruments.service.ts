@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InstrumentsRepository } from './instruments.repository';
-import { Instrument } from '../../interfaces/instrument.interface';
+import { Instrument } from '../../interfaces/instrument.class';
 
 @Injectable()
 export class InstrumentsService {

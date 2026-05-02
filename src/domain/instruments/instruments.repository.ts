@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import { join } from 'path';
-import { Instrument } from '../../interfaces/instrument.interface';
+import { Instrument } from '../../interfaces/instrument.class';
 
 export class InstrumentsRepository {
   private readonly filePath = join(process.cwd(), 'data', 'instruments.json');

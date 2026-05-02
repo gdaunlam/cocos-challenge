@@ -1,0 +1,3 @@
+ENABLE_SWAGGER=true
+NODE_ENV=staging
+PORT=3000
