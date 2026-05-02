@@ -12,7 +12,7 @@
     "rootDir": "./src",
     "incremental": false,
     "skipLibCheck": true,
-    "types": ["node"],
+    "types": ["node", "jest"],
     "strictNullChecks": true,
     "noImplicitAny": true,
     "strictBindCallApply": true,

@@ -20,8 +20,10 @@ const validatePort = (): number => {
   return port;
 };
 
-export const environment = {
+export const getEnvironment = () => ({
   nodeEnv: validateNodeEnv(),
   enableSwagger: process.env.ENABLE_SWAGGER === 'true',
   port: validatePort(),
-} as const;
+});
+
+export const environment = getEnvironment();
