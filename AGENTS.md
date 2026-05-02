@@ -102,3 +102,27 @@ Follow-up session needed for refresh tokens
 - Commit AGENTS.md to Git so all team members share the same rules
 - Keep changelog entries stable - they're reference documents, not logs
 - If a session is purely exploratory/research with no file changes, a changelog entry is not required
+
+---
+
+## Pre-Implementation Changelog Check (MANDATORY)
+
+Before implementing ANY change, you MUST check for potential conflicts with existing CHANGELOG entries:
+
+### Procedure
+1. **List changelog files** (most recent first):
+   ```bash
+   ls -la CHANGELOG/ && for f in CHANGELOG/*.md; do echo "=== $(basename $f) ===" && head -20 "$f"; done
+   ```
+
+2. **Read changelogs in reverse chronological order** (newest first) to understand the current state of the project
+
+3. **Verify your intended change does not conflict with documented behavior**:
+   - If your change would contradict something already implemented (per CHANGELOG), STOP and report the conflict
+   - If your change would invalidate an existing implementation, STOP and report the conflict
+   - Proceed only if your change is complementary or genuinely corrective
+
+4. **Report before proceeding** if conflicts are found. Include:
+   - What the CHANGELOG says
+   - What your change would do
+   - Request guidance on how to proceed

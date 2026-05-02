@@ -15,7 +15,6 @@ Se formalizó la configuración de environments creando archivos `.envs` por ent
 | .envs/.production | Created with ENABLE_SWAGGER=false, NODE_ENV=production |
 | src/main.ts | Added dotenv loading based on NODE_ENV |
 | package.json | Added dotenv dependency |
-| .gitignore | Added .envs to ignored files |
 
 ## Related
 Pendiente: asegurar que NODE_ENV se setee al ejecutar npm start

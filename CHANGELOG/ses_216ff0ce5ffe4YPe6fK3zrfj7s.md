@@ -9,9 +9,9 @@ Added nodemon to the project's development workflow to enable live-reload functi
 
 ## Changes Made
 
-1. **Updated `start:dev` script** in `package.json`:
-   - Changed from: `"start:dev": "ts-node src/main.ts"`
-   - Changed to: `"start:dev": "nodemon --exec ts-node src/main.ts"`
+1. **Added `start:dev:watch` script** in `package.json`:
+   - Added new script: `"start:dev:watch": "nodemon --exec \"npm run lint && ts-node src/main.ts\""`
+   - Original `start:dev` script remains unchanged using plain `ts-node`
 
 2. **Added `nodemon` as devDependency** in `package.json`:
    - Added `"nodemon": "^3.1.9"` to devDependencies

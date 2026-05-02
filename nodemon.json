@@ -1,0 +1,15 @@
+{
+  "watch": [
+    "src",
+    ".envs"
+  ],
+  "ext": "*",
+  "ignore": [
+    "node_modules",
+    "dist"
+  ],
+  "exec": "npm run lint && ts-node src/main.ts",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

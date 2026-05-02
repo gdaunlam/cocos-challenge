@@ -11,7 +11,8 @@ Refactored configuration system to remove code duplication and improve type safe
 | File | Change |
 |------|--------|
 | src/config/configuration.ts | Removed duplicate Environment enum, imported from environment.ts |
-| src/config/config.service.ts | Added IAppConfigService interface, replaced ! assertion with OnModuleInit validation |
+| src/config/config.service.ts | Deleted (AppConfigService wrapper removed, using ConfigService directly with generic type) |
+| src/tracer/trace.middleware.ts | Fixed `next()` call outside `runWithTraceId` callback to ensure correct middleware execution order |
 
 ## Details
 - `Environment` enum now lives only in `environment.ts`

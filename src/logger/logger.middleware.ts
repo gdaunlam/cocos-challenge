@@ -1,6 +1,6 @@
 import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import { TraceService } from './trace.service';
+import { TraceService } from '../tracer/trace.service';
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
@@ -12,10 +12,9 @@ export class LoggerMiddleware implements NestMiddleware {
     const { method, url, headers } = req;
     const traceId = this.traceService.getTraceId();
     const userAgent = headers['user-agent'] || '-';
-    const contentLength = headers['content-length'] || '-';
 
     this.logger.log(
-      `[${traceId}] ${method} ${url} - ${contentLength} bytes - ${userAgent}`,
+      `[${traceId}] ${method} ${url} - ${userAgent}`,
     );
 
     next();

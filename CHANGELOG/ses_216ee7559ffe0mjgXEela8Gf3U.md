@@ -8,10 +8,13 @@
 Configuración de Husky para validar que el proyecto compila correctamente antes de permitir commits.
 
 ## Changes Made
-- Instalación de `husky` como dev dependency
-- Inicialización de repositorio Git (el proyecto no tenía uno)
-- Creación de `.husky/pre-commit` hook que ejecuta `npm run build`
-- El hook valida que el build de TypeScript (`tsc`) pase antes de permitir commits
+1. **Installed `husky` as devDependency** in `package.json`
+2. **Initialized Git repository** (project didn't have one)
+3. **Created `.husky/pre-commit` hook** that executes:
+   ```
+   npm run lint && npm run typecheck && npm run test && npm run build
+   ```
+   The hook validates that lint, typecheck, tests, and build all pass before allowing commits
 
 ## Key Changes
 | File | Change |

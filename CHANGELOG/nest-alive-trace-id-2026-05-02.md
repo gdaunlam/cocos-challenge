@@ -10,17 +10,17 @@ Added trace ID system for request tracking across logs, errors, and future datab
 ## Key Changes
 | File | Change |
 |------|--------|
-| src/common/trace/trace.service.ts | Created TraceService with AsyncLocalStorage |
-| src/common/trace/trace.interceptor.ts | Created TraceInterceptor to extract/generate trace ID |
-| src/common/trace/trace.filter.ts | Created TraceExceptionFilter to include trace ID in errors |
-| src/common/trace/trace.logger.ts | Created TraceLogger with trace ID in all log levels |
-| src/common/trace/trace.middleware.ts | Created TraceMiddleware (not currently used) |
-| src/common/trace/trace.module.ts | Created global TraceModule |
+| src/tracer/trace.service.ts | Created TraceService with AsyncLocalStorage |
+| src/tracer/trace.interceptor.ts | Created TraceInterceptor to extract/generate trace ID |
+| src/tracer/trace.filter.ts | Created TraceExceptionFilter to include trace ID in errors |
+| src/tracer/trace.logger.ts | Created TraceLogger with trace ID in all log levels |
+| src/tracer/trace.middleware.ts | Created TraceMiddleware (not currently used) |
+| src/tracer/trace.module.ts | Created global TraceModule |
 | src/app.module.ts | Imported TraceModule, registered interceptor and filter globally |
 | src/main.ts | Fixed ConfigService usage for IEnvironmentConfig |
 | package.json | Added uuid and @types/express dependencies |
 
 ## Technical Details
-- **Header**: `X-Trace-ID` (uses UUID v4 if not provided)
+- **Header**: `x-trace-id` (uses UUID v4 if not provided)
 - **Storage**: AsyncLocalStorage for request-scoped access
 - **Coverage**: Logs (all levels), exception filter, response header
