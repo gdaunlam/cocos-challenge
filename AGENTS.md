@@ -126,3 +126,47 @@ Before implementing ANY change, you MUST check for potential conflicts with exis
    - What the CHANGELOG says
    - What your change would do
    - Request guidance on how to proceed
+
+---
+
+## Code Standards (MANDATORY)
+
+**You MUST follow the standards defined in `STANDARDS.md`.** Read it before starting any implementation.
+
+```bash
+cat STANDARDS.md
+```
+
+### Quick Reference
+
+| Rule | Standard |
+|------|----------|
+| Module structure | `src/domain/{entity}/{entity}.module.ts` |
+| Request DTOs | `src/domain/{entity}/controller/request/` |
+| Business interfaces | `src/interfaces/{entity}.class.ts` |
+| Middleware registration | Always in `app.module.ts`, NOT in child modules |
+| `next()` in middleware | Must be inside `runWithTraceId()` callback |
+| Swagger docs | Use `@ApiProperty()` on DTOs and entities |
+
+### Why Standards Matter
+
+- **Consistency**: Any developer can navigate the codebase without learning project-specific patterns
+- **Discoverability**: When something is where you expect it to be
+- **Testability**: Patterns like "middleware in app.module.ts" are easier to test because there's no hidden configuration
+- **No magic**: Configuration that happens in multiple places is configuration that gets forgotten
+
+### When Standards Don't Apply
+
+If a situation isn't covered by STANDARDS.md:
+1. Use your best judgment following NestJS conventions
+2. Document your decision
+3. Propose a new standard in STANDARDS.md if it's a recurring pattern
+
+---
+
+## Pre-Commit Checklist
+
+Before committing, verify:
+- [ ] Changes follow STANDARDS.md rules
+- [ ] CHANGELOG updated (if applicable)
+- [ ] `npm run lint && npm run typecheck && npm run test && npm run build` passes

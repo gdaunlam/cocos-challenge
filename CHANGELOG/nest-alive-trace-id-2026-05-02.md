@@ -18,9 +18,15 @@ Added trace ID system for request tracking across logs, errors, and future datab
 | src/tracer/trace.module.ts | Created global TraceModule |
 | src/app.module.ts | Imported TraceModule, registered interceptor and filter globally |
 | src/main.ts | Fixed ConfigService usage for IEnvironmentConfig |
-| package.json | Added uuid and @types/express dependencies |
 
-## Technical Details
-- **Header**: `x-trace-id` (uses UUID v4 if not provided)
-- **Storage**: AsyncLocalStorage for request-scoped access
-- **Coverage**: Logs (all levels), exception filter, response header
+## Updates (2026-05-02T19:00:00.000Z)
+| File | Change |
+|------|--------|
+| src/app.module.ts | Added NestModule implementation with TraceMiddleware registered for all routes |
+| src/tracer/trace.middleware.ts | Fixed next() call inside runWithTraceId callback |
+
+## Updates (2026-05-02T19:30:00.000Z)
+| File | Change |
+|------|--------|
+| src/logger/trace.logger.ts | Deleted - not used anywhere |
+| src/tracer/trace.interceptor.ts | Simplified - removed redundant trace ID fallback logic |

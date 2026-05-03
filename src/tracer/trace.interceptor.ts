@@ -8,10 +8,7 @@ export class TraceInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest();
-    const existingTraceId = this.traceService.getTraceId();
-    const traceId = existingTraceId !== 'no-trace' 
-      ? existingTraceId 
-      : this.traceService.extractOrCreateTraceId(request.headers);
+    const traceId = this.traceService.extractOrCreateTraceId(request.headers);
 
     return new Observable(subscriber => {
       this.traceService.runWithTraceId(traceId, () => {
