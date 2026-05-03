@@ -2,22 +2,18 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { InstrumentsService } from './instruments.service';
 import { InstrumentsRepository } from './instruments.repository';
-import { Instrument } from '../../interfaces/instrument.class';
+import { Instrument } from '../../database/migrations/entities/instrument.entity';
 
 describe('InstrumentsService', () => {
   let service: InstrumentsService;
   let repository: jest.Mocked<InstrumentsRepository>;
-  let mockInstruments: Instrument[];
 
   beforeEach(async () => {
-    mockInstruments = [
-      { name: 'Guitar', emissionDate: '2024-01-01', amount: 599 },
-      { name: 'Piano', emissionDate: '2024-01-01', amount: 2999 },
-    ];
-
     const mockRepository = {
       findAll: jest.fn(),
+      findByName: jest.fn(),
       save: jest.fn(),
+      delete: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -37,6 +33,10 @@ describe('InstrumentsService', () => {
 
   describe('findAll', () => {
     it('should return all instruments', async () => {
+      const mockInstruments: Instrument[] = [
+        { name: 'Guitar', emissionDate: '2024-01-01', amount: 599 },
+        { name: 'Piano', emissionDate: '2024-01-01', amount: 2999 },
+      ];
       repository.findAll.mockResolvedValue(mockInstruments);
       const result = await service.findAll();
       expect(result).toEqual(mockInstruments);
@@ -46,28 +46,41 @@ describe('InstrumentsService', () => {
 
   describe('create', () => {
     it('should create a new instrument', async () => {
-      repository.findAll.mockResolvedValue(mockInstruments);
-      repository.save.mockResolvedValue();
       const newInstrument = { name: 'Drums', emissionDate: '2024-01-01', amount: 799 };
+      const savedInstrument = { name: 'Drums', emissionDate: '2024-01-01', amount: 799 };
+      const allInstruments: Instrument[] = [
+        { name: 'Guitar', emissionDate: '2024-01-01', amount: 599 },
+        newInstrument,
+      ];
+
+      repository.findByName.mockResolvedValue(null);
+      repository.save.mockResolvedValue(savedInstrument);
+      repository.findAll.mockResolvedValue(allInstruments);
+
       const result = await service.create(newInstrument);
-      expect(result).toContainEqual(newInstrument);
-      expect(repository.save).toHaveBeenCalled();
+      expect(result).toEqual(allInstruments);
+      expect(repository.save).toHaveBeenCalledWith(newInstrument);
     });
 
     it('should throw BadRequestException if instrument already exists', async () => {
-      repository.findAll.mockResolvedValue([mockInstruments[0]]);
-      await expect(service.create(mockInstruments[0])).rejects.toThrow(BadRequestException);
+      const existingInstrument = { name: 'Guitar', emissionDate: '2024-01-01', amount: 599 };
+      repository.findByName.mockResolvedValue(existingInstrument);
+      await expect(service.create(existingInstrument)).rejects.toThrow(BadRequestException);
     });
   });
 
   describe('delete', () => {
     it('should delete an instrument by name', async () => {
-      repository.findAll.mockResolvedValue(mockInstruments);
-      repository.save.mockResolvedValue();
+      const remainingInstruments: Instrument[] = [
+        { name: 'Piano', emissionDate: '2024-01-01', amount: 2999 },
+      ];
+
+      repository.delete.mockResolvedValue();
+      repository.findAll.mockResolvedValue(remainingInstruments);
+
       const result = await service.delete('Guitar');
-      expect(result).toHaveLength(1);
-      expect(result[0].name).toBe('Piano');
-      expect(repository.save).toHaveBeenCalled();
+      expect(result).toEqual(remainingInstruments);
+      expect(repository.delete).toHaveBeenCalledWith('Guitar');
     });
   });
 });

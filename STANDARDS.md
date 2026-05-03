@@ -28,6 +28,20 @@ src/interfaces/
 
 **Por qué:** Las interfaces de negocio no pertenecen a ningún dominio específico y pueden ser compartidas.
 
+### Estructura TypeORM (centralizada)
+Cuando se usa TypeORM, centralizar todo lo relacionado en `src/database/`:
+```
+src/database/
+├── configuration.ts        # registerAs('database', ...)
+├── environment.ts          # IDatabaseConfig interface
+└── migrations/
+    ├── entities/
+    │   └── {entity}.entity.ts
+    └── {timestamp}-Create{Entity}Table.ts
+```
+
+**Por qué:** Mantiene entidades, migraciones y configuración de base de datos en un solo lugar, evitando distribución entre módulos de dominio y configuración.
+
 ---
 
 ## 2. DTOs y Validación
@@ -118,8 +132,37 @@ Cargar en `app.module.ts`:
 ConfigModule.forRoot({
   isGlobal: true,
   envFilePath: `.envs/.${process.env.NODE_ENV || 'development'}`,
-  load: [configuration],
+  load: [configuration, databaseConfiguration],
 }),
+```
+
+### Configuración TypeORM CLI
+Archivo `typeorm-cli.config.ts` en raíz del proyecto para comandos de migraciones:
+```typescript
+import { DataSource } from 'typeorm';
+import * as dotenv from 'dotenv';
+dotenv.config({ path: `.envs/.${process.env.NODE_ENV || 'development'}` });
+
+export const AppDataSource = new DataSource({
+  type: 'postgres',
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT || '5432', 10),
+  username: process.env.DB_USERNAME || 'postgres',
+  password: process.env.DB_PASSWORD || 'postgres',
+  database: process.env.DB_DATABASE || 'nest_alive',
+  migrations: ['dist/database/migrations/*.js'],
+  migrationsTableName: 'migrations',
+});
+```
+
+Scripts en `package.json`:
+```json
+{
+  "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d typeorm-cli.config.ts",
+  "migration:run": "npm run typeorm migration:run",
+  "migration:revert": "npm run typeorm migration:revert",
+  "migration:generate": "npm run typeorm migration:generate"
+}
 ```
 
 ---
@@ -146,7 +189,7 @@ ConfigModule.forRoot({
 
 | Tipo | Ubicación | Ejemplo |
 |------|-----------|---------|
-| Interfaces de negocio | `src/interfaces/` | `import { Instrument } from '../../interfaces/instrument.class'` |
+| Entities (TypeORM) | `src/database/migrations/entities/` | `import { Instrument } from '../../database/migrations/entities/instrument.entity'` |
 | Request DTOs | `controller/request/` | `import { CreateInstrumentRequest } from './request/create-instrument.request'` |
 | Services | `../{service}` | `import { InstrumentsService } from '../instruments.service'` |
 | Repositories | `../{repository}` | `import { InstrumentsRepository } from '../instruments.repository'` |
@@ -192,13 +235,32 @@ if (existingTraceId !== 'no-trace') {
 const traceId = this.traceService.extractOrCreateTraceId(request.headers);
 ```
 
+### ❌ No hacer: Ampliar área de afectación en cambios de infraestructura
+Cuando el requerimiento pide cambiar solo la herramienta de conexión o datasource (ej: de JSON a PostgreSQL), evitar modificar lógica de negocio existente.
+
+**Usar SOLID como guía:**
+- **S**ingle Responsibility: La capa Repository es responsable de acceder a datos; el Service de la lógica de negocio
+- **O**pen/Closed: Extender comportamiento agregando módulos, no modificando los existentes
+- **L**iskov Substitution: El Repository debe cumplir el contrato de la interfaz que expone
+- **I**nterface Segregation: Si el Service necesita `findAll()`, el Repository debe proveérlo
+- **D**ependency Inversion: El Service depende de abstracciones (interfaz del Repository), no de implementaciones concretas
+
+**Preguntar siempre:**
+Antes de modificar el Service, consultar si el cambio es necesario o si solo se debe adaptar la capa Repository.
+
+**MAL:** Modificar `findAll()` o `create()` en Service por mera conveniencia de implementación, ampliando el área de afectación
+**BIEN:** Adaptar solo el Repository para que exponga los métodos que el Service necesita, manteniendo la lógica existente intacta
+
+**Por qué:** Un cambio debe tener el menor impacto posible. Modificar lógica de negocio introduce riesgo de regresión y efectos colaterales que no estaban en el alcance del requerimiento.
+
 ---
 
 ## 8. Checklist antes de Commit
 
 - [ ] ¿Nuevo módulo en `src/domain/`?
 - [ ] ¿Request DTO con `class-validator` y `@ApiProperty`?
-- [ ] ¿Interface de negocio en `src/interfaces/` con `@ApiProperty`?
+- [ ] ¿Entity TypeORM en `src/database/migrations/entities/` con `@ApiProperty`?
+- [ ] ¿Migración en `src/database/migrations/`?
 - [ ] ¿Middleware registrado en `app.module.ts`?
 - [ ] ¿`next()` dentro de `runWithTraceId()`?
 - [ ] ¿Tests para lógica nueva?
@@ -211,7 +273,8 @@ const traceId = this.traceService.extractOrCreateTraceId(request.headers);
 Al trabajar en este proyecto:
 1. **Lee `STANDARDS.md` antes de hacer cambios**
 2. **Revisa los changelogs en `CHANGELOG/`** para entender decisiones previas
-3. **Si algo no está cubierto, pregúntame** antes de asumir
+3. **Si algo no está cubierto, pregúntame antes de asumir**
+4. **Si un cambio implica lógica de negocio o amplía el área de afectación, pregúntame antes de implementarlo**
 
 Para agregar nuevos estándares, crear PR con:
 - Descripción del pattern

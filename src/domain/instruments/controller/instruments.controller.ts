@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Delete, Body, Param } from '@nestjs/common';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { InstrumentsService } from '../instruments.service';
-import { Instrument } from '../../../interfaces/instrument.class';
+import { Instrument } from '../../../database/migrations/entities/instrument.entity';
 import { CreateInstrumentRequest } from './request/create-instrument.request';
 
 @ApiTags('Instruments')

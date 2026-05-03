@@ -1,5 +1,6 @@
 import { Module, MiddlewareConsumer, NestModule, RequestMethod } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { configuration } from './config/configuration';
 import { InstrumentsModule } from './domain/instruments/instruments.module';
@@ -8,13 +9,31 @@ import { TraceExceptionFilter } from './tracer/trace.filter';
 import { TraceMiddleware } from './tracer/trace.middleware';
 import { LoggerMiddleware } from './logger/logger.middleware';
 import { TraceService } from './tracer/trace.service';
+import { databaseConfiguration } from './database/configuration';
+import { IDatabaseConfig } from './database/environment';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: `.envs/.${process.env.NODE_ENV || 'development'}`,
-      load: [configuration],
+      load: [configuration, databaseConfiguration],
+    }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const dbConfig = configService.get<IDatabaseConfig>('database')!;
+        return {
+          type: 'postgres',
+          host: dbConfig.dbHost,
+          port: dbConfig.dbPort,
+          username: dbConfig.dbUsername,
+          password: dbConfig.dbPassword,
+          database: dbConfig.dbDatabase,
+          autoLoadEntities: true,
+          synchronize: false,
+        };
+      },
     }),
     InstrumentsModule,
   ],

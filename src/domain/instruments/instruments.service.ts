@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InstrumentsRepository } from './instruments.repository';
-import { Instrument } from '../../interfaces/instrument.class';
+import { Instrument } from '../../database/migrations/entities/instrument.entity';
 
 @Injectable()
 export class InstrumentsService {
@@ -11,19 +11,16 @@ export class InstrumentsService {
   }
 
   async create(data: Omit<Instrument, 'name'> & { name: string }): Promise<Instrument[]> {
-    const instruments = await this.instrumentsRepository.findAll();
-    if (instruments.some((i) => i.name === data.name)) {
+    const existing = await this.instrumentsRepository.findByName(data.name);
+    if (existing) {
       throw new BadRequestException(`Instrument ${data.name} already exists`);
     }
-    instruments.push(data);
-    await this.instrumentsRepository.save(instruments);
-    return instruments;
+    await this.instrumentsRepository.save(data as Instrument);
+    return this.findAll();
   }
 
   async delete(name: string): Promise<Instrument[]> {
-    const instruments = await this.instrumentsRepository.findAll();
-    const filtered = instruments.filter((i) => i.name !== name);
-    await this.instrumentsRepository.save(filtered);
-    return filtered;
+    await this.instrumentsRepository.delete(name);
+    return this.findAll();
   }
 }

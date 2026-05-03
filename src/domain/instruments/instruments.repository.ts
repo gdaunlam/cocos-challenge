@@ -1,16 +1,25 @@
-import { promises as fs } from 'fs';
-import { join } from 'path';
-import { Instrument } from '../../interfaces/instrument.class';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Instrument } from '../../database/migrations/entities/instrument.entity';
 
+@Injectable()
 export class InstrumentsRepository {
-  private readonly filePath = join(process.cwd(), 'data', 'instruments.json');
+  constructor(@InjectRepository(Instrument) private readonly repository: Repository<Instrument>) {}
 
   async findAll(): Promise<Instrument[]> {
-    const data = await fs.readFile(this.filePath, 'utf-8');
-    return JSON.parse(data);
+    return this.repository.find();
   }
 
-  async save(instruments: Instrument[]): Promise<void> {
-    await fs.writeFile(this.filePath, JSON.stringify(instruments, null, 2));
+  async findByName(name: string): Promise<Instrument | null> {
+    return this.repository.findOne({ where: { name } });
+  }
+
+  async save(instrument: Instrument): Promise<Instrument> {
+    return this.repository.save(instrument);
+  }
+
+  async delete(name: string): Promise<void> {
+    await this.repository.delete({ name });
   }
 }
