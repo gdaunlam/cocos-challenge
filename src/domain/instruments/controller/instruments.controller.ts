@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Delete, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { InstrumentsService } from '../instruments.service';
 import { Instrument } from '../../../database/migrations/entities/instrument.entity';
 import { CreateInstrumentRequest } from './request/create-instrument.request';
+import { GetInstrumentsQueryDto } from './request/get-instruments-query.dto';
+import { DeleteInstrumentParamDto } from './request/delete-instrument-param.dto';
 
 @ApiTags('Instruments')
 @Controller('instruments')
@@ -11,8 +13,8 @@ export class InstrumentsController {
 
   @Get()
   @ApiResponse({ status: 200, description: 'OK', type: [Instrument] })
-  findAll(): Promise<Instrument[]> {
-    return this.instrumentsService.findAll();
+  findAll(@Query() query: GetInstrumentsQueryDto): Promise<Instrument[]> {
+    return this.instrumentsService.findAll(query.page, query.limit);
   }
 
   @Post()
@@ -23,7 +25,7 @@ export class InstrumentsController {
 
   @Delete(':name')
   @ApiResponse({ status: 200, description: 'OK', type: [Instrument] })
-  delete(@Param('name') name: string): Promise<Instrument[]> {
-    return this.instrumentsService.delete(name);
+  delete(@Param() params: DeleteInstrumentParamDto): Promise<Instrument[]> {
+    return this.instrumentsService.delete(params.name);
   }
 }

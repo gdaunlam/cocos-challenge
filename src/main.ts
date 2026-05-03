@@ -10,7 +10,11 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const env = configService.get<IEnvironmentConfig>('environment')!;
 
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true,
+    whitelist: true,
+    forbidNonWhitelisted: true,
+  }));
 
   if (env.enableSwagger) {
     const swaggerConfig = new DocumentBuilder()

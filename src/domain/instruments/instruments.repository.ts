@@ -7,7 +7,13 @@ import { Instrument } from '../../database/migrations/entities/instrument.entity
 export class InstrumentsRepository {
   constructor(@InjectRepository(Instrument) private readonly repository: Repository<Instrument>) {}
 
-  async findAll(): Promise<Instrument[]> {
+  async findAll(page?: number, limit?: number): Promise<Instrument[]> {
+    if (page !== undefined && limit !== undefined) {
+      return this.repository.find({
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+    }
     return this.repository.find();
   }
 

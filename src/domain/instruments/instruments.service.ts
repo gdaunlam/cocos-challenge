@@ -6,8 +6,8 @@ import { Instrument } from '../../database/migrations/entities/instrument.entity
 export class InstrumentsService {
   constructor(private readonly instrumentsRepository: InstrumentsRepository) {}
 
-  async findAll(): Promise<Instrument[]> {
-    return this.instrumentsRepository.findAll();
+  async findAll(page?: number, limit?: number): Promise<Instrument[]> {
+    return this.instrumentsRepository.findAll(page, limit);
   }
 
   async create(data: Omit<Instrument, 'name'> & { name: string }): Promise<Instrument[]> {
