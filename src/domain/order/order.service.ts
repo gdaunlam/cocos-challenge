@@ -6,7 +6,7 @@ import { cacheService } from '../shared/cache';
 import { Instrument } from '../../database/migrations/entities/instrument.entity';
 import { MarketData } from '../../database/migrations/entities/marketdata.entity';
 import { Order } from '../../database/migrations/entities/order.entity';
-import { CreateOrderInput, CreateOrderResult } from '../../interfaces/order.class';
+import { CreateOrderInput, CreateOrderResult } from './order.interface';
 
 @Injectable()
 export class OrderService {

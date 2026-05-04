@@ -7,7 +7,7 @@ import {
   SearchInstrumentsOutput,
   SearchInstrumentsResult,
   SearchBy
-} from '../../interfaces/instrument-search.class';
+} from './instrument-search.interface';
 
 @Injectable()
 export class InstrumentSearchService {

@@ -4,7 +4,7 @@ import { PortfolioStatusBuilder } from '../shared/portfolio-status-builder';
 import { MarketPricesResolver } from '../shared/market-prices-resolver';
 import { cached } from '../shared/cache';
 import { InstrumentStatusMap } from '../shared/instrument-status';
-import { Position, PortfolioBody } from '../../interfaces/portfolio.class';
+import { Position, PortfolioBody } from './portfolio.interface';
 
 @Injectable()
 export class PortfolioService {

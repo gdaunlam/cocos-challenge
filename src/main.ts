@@ -6,8 +6,11 @@ import cors from 'cors';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { IEnvironmentConfig } from './config/environment';
+import { runMigrations } from './database/run-migrations';
 
 async function bootstrap() {
+  await runMigrations();
+
   const app = await NestFactory.create(AppModule);
   app.use(helmet());
   app.use(cors());
