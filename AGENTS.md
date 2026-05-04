@@ -170,3 +170,57 @@ Before committing, verify:
 - [ ] Changes follow STANDARDS.md rules
 - [ ] CHANGELOG updated (if applicable)
 - [ ] `npm run lint && npm run typecheck && npm run test && npm run build` passes
+
+---
+
+## CRITICAL: Read SOLUTION.md Before Starting Work
+
+**You MUST read `docs/solution/SOLUTION.md` before taking ANY action.**
+
+```bash
+cat docs/solution/SOLUTION.md
+```
+
+**Why this is MANDATORY:**
+- Avoid contradicting design decisions already made in discussions
+- Build on existing solutions instead of re-solving problems
+- Understand the accepted patterns and approaches
+- Reference the established design for Portfolio, Cash, and Position calculations
+
+### Quick Reference from SOLUTION.md
+
+**Portfolio Calculations:**
+```
+quantity = Σ (size * side_multiplier) where BUY=+1, SELL=-1
+costBasis = Σ (size * price) for BUY FILLED orders only
+totalReturnPercentage = (marketValue - costBasis) / costBasis * 100
+```
+
+**Cash Calculations (FILLED orders only):**
+- CASH_IN: += size
+- CASH_OUT: -= size
+- BUY: -= size * price
+- SELL: += size * price
+
+**Reserved = NEW LIMIT BUY orders:**
+```
+reserved = Σ (size * price) for NEW + LIMIT + BUY
+```
+
+**Design Patterns:**
+Use **CashCalculator + PositionCalculator + PortfolioService** pattern.
+
+Entities go in `src/domain/shared/entities/`:
+- `order.entity.ts`
+- `instrument.entity.ts`
+- `marketdata.entity.ts`
+- `user.entity.ts`
+- `portfolio.entity.ts`
+
+### Update SOLUTION.md After Work
+
+After completing ANY significant work, update `docs/solution/SOLUTION.md`:
+1. Add a new section describing the problem and solution
+2. Include code snippets if relevant
+3. Document design decisions and patterns used
+4. Keep it concise and reference actual file paths

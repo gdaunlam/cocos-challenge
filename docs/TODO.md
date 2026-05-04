@@ -1,4 +1,6 @@
-DISCARDED
+# TODO - Nest Alive
+
+## DISCARDED
     segurización (infra level)
         rate limit: WAF/firewall - no requerido en código
         whitelist: WAF/firewall - no requerido en código
@@ -9,7 +11,7 @@ DISCARDED
         csrf: N/A - sin cookies/sessions no aplica
         content security policy: N/A - mas relevant para front-end que serve
 
-DONE
+## DONE
     swagger
         @nestjs/swagger integrado, DocumentBuilder en main.ts, /api route
         Toggle: ENABLE_SWAGGER env var (false en production)
@@ -52,7 +54,7 @@ DONE
         helmet: app.use(helmet()) en main.ts
         cors: app.use(cors()) en main.ts
 
-TODO
+## TODO
     requerimiento
         aplicación
         casos de uso
@@ -64,3 +66,101 @@ TODO
         diagrama
         colección de postman
         actualizar swagger
+
+---
+
+## REST API (Faltante)
+
+Implementar API REST con Express o NestJS.
+
+### Endpoints requeridos
+
+1. **GET /portfolio/:userId**
+   - Retorna `PortfolioBody` con totalValue, availableCash, positions
+   - Delegar a `PortfolioService.calculatePortfolio()`
+
+2. **GET /instruments/search?q=&type=&searchBy=&page=&limit=**
+   - Query params: `q` (min 3 chars), `type` (ACCIONES|MONEDA), `searchBy` (ticker|name|both), `page`, `limit`
+   - Retorna `SearchInstrumentsOutput` con results y pagination
+   - Delegar a `InstrumentSearchService.search()`
+
+3. **POST /orders**
+   - Body: `{ instrumentId, userId, side, quantity?, amount?, price? }`
+   - Crear orden via `OrderService.createOrder()`
+   - Retornar la orden creada
+
+### Notas de implementación
+
+- No requiere autenticación (según consigna)
+- El test funcional sobre crear órdenes ya existe en `src/domain/order/__tests__/order.test.ts`
+
+---
+
+## Base de datos PostgreSQL (Faltante)
+
+Reemplazar datos en memoria (`data.json`) con conexión real a PostgreSQL.
+
+### Tablas existentes
+
+```sql
+-- users: id, email, accountNumber
+-- instruments: id, ticker, name, type
+-- orders: id, instrumentId, userId, side, size, price, type, status, datetime
+-- marketdata: id, instrumentId, high, low, open, close, previousClose, datetime
+```
+
+### Cambios requeridos
+
+1. **Instalar cliente PostgreSQL** (pg, drizzle, prisma, etc.)
+2. **Crear conexión a DB** con variables de entorno (DATABASE_URL)
+3. **Refactorizar repositories:**
+   - `InstrumentRepository`: queries a `instruments` y `marketdata`
+   - Orders queries para `PortfolioStatusBuilder`
+   - user queries para validación
+4. **Ejecutar queries** en PortfolioService, OrderService, InstrumentSearchService
+
+### Índices recomendados
+
+```sql
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX idx_instruments_ticker_trgm ON instruments USING gin (ticker gin_trgm_ops);
+CREATE INDEX idx_instruments_name_trgm ON instruments USING gin (name gin_trgm_ops);
+```
+
+---
+
+## Búsqueda con similarity - pg_trgm (Faltante)
+
+Implementar búsqueda de instrumentos usando `similarity()` de PostgreSQL.
+
+### SQL necesario (ya documentado en SOLUTION.md)
+
+```sql
+-- searchBy = 'ticker'
+score = similarity(ticker, query)
+
+-- searchBy = 'name'
+score = similarity(name, query)
+
+-- searchBy = 'both' (default)
+score = GREATEST(
+  similarity(ticker, query) * 0.7,
+  similarity(name, query) * 0.3
+)
+
+ORDER BY score DESC
+LIMIT {limit} OFFSET {offset};
+```
+
+### Implementación
+
+1. Agregar método `findWithSimilarity(query, searchBy, type, limit, offset)` a `InstrumentRepository`
+2. Usar `pg_trgm` extension para `similarity()`
+3. Actualizar `InstrumentSearchService` para usar el nuevo método (reemplazar filtering in-memory)
+
+---
+
+## Opcional / Nice to have
+
+- Proveer colección Postman, Insomnia o REST Client para la API
+- Ejemplos de invocación de cada endpoint
