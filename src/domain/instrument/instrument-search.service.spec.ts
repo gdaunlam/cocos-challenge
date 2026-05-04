@@ -1,0 +1,98 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const data = require('../../../data/data.json');
+import { InstrumentSearchService } from './instrument-search.service';
+import { InstrumentRepository } from './instrument.repository';
+import { Instrument, InstrumentType } from '../../database/migrations/entities/instrument.entity';
+
+const instruments = data.instruments as Instrument[];
+
+const createMockRepository = (overrides?: Partial<InstrumentRepository>): InstrumentRepository => ({
+  findAll: jest.fn().mockResolvedValue(instruments),
+  findByType: jest.fn().mockResolvedValue(instruments.filter(i => i.type === 'ACCIONES')),
+  findById: jest.fn().mockResolvedValue(null),
+  ...overrides,
+});
+
+describe('InstrumentSearchService', () => {
+  let service: InstrumentSearchService;
+  let mockRepository: InstrumentRepository;
+
+  beforeEach(() => {
+    mockRepository = createMockRepository();
+    service = new InstrumentSearchService(mockRepository);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return results for valid query', async () => {
+    const result = await service.search({ query: 'gal', page: 1, limit: 10 });
+
+    expect(result.results.length).toBeGreaterThan(0);
+    expect(result.pagination.page).toBe(1);
+    expect(result.pagination.limit).toBe(10);
+  });
+
+  it('should order results by score descending', async () => {
+    const result = await service.search({ query: 'banco', page: 1, limit: 10 });
+
+    for (let i = 1; i < result.results.length; i++) {
+      expect(result.results[i - 1].score).toBeGreaterThanOrEqual(result.results[i].score);
+    }
+  });
+
+  it('should filter by type when provided', async () => {
+    const result = await service.search({ query: 'arg', page: 1, limit: 10, type: 'MONEDA' as InstrumentType });
+
+    for (const r of result.results) {
+      expect(r.type).toBe('MONEDA');
+    }
+  });
+
+  it('should paginate results correctly', async () => {
+    const result = await service.search({ query: 'arg', page: 1, limit: 2 });
+
+    expect(result.results.length).toBe(2);
+    expect(result.pagination.totalPages).toBeGreaterThanOrEqual(1);
+  });
+
+  it('should throw error for query shorter than 3 characters', async () => {
+    await expect(service.search({ query: 'ab', page: 1, limit: 10 }))
+      .rejects.toThrow('query must be at least 3 characters');
+  });
+
+  it('should throw error for page <= 0', async () => {
+    await expect(service.search({ query: 'abc', page: 0, limit: 10 }))
+      .rejects.toThrow('page must be a positive number');
+  });
+
+  it('should throw error for limit <= 0', async () => {
+    await expect(service.search({ query: 'abc', page: 1, limit: 0 }))
+      .rejects.toThrow('limit must be a positive number');
+  });
+
+  it('should search by ticker only when searchBy=ticker', async () => {
+    const result = await service.search({ query: 'ggal', page: 1, limit: 10, searchBy: 'ticker' });
+
+    expect(result.results.length).toBeGreaterThan(0);
+    const topResult = result.results[0];
+    expect(topResult.ticker.toLowerCase()).toContain('ggal');
+  });
+
+  it('should search by name only when searchBy=name', async () => {
+    const result = await service.search({ query: 'galicia', page: 1, limit: 10, searchBy: 'name' });
+
+    expect(result.results.length).toBeGreaterThan(0);
+    const topResult = result.results[0];
+    expect(topResult.name.toLowerCase()).toContain('galicia');
+  });
+
+  it('should use weighted scoring for searchBy=both (default)', async () => {
+    const result = await service.search({ query: 'ggal', page: 1, limit: 10 });
+
+    expect(result.results.length).toBeGreaterThan(0);
+    const topResult = result.results[0];
+    expect(topResult.ticker).toBe('GGAL');
+  });
+});
