@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { configuration } from './config/configuration';
-import { InstrumentsModule } from './domain/instruments/instruments.module';
+import { InstrumentModule } from './domain/instrument/instrument.module';
 import { TraceInterceptor } from './tracer/trace.interceptor';
 import { TraceExceptionFilter } from './tracer/trace.filter';
 import { TraceMiddleware } from './tracer/trace.middleware';
@@ -35,7 +35,7 @@ import { IDatabaseConfig } from './database/environment';
         };
       },
     }),
-    InstrumentsModule,
+    InstrumentModule,
   ],
   providers: [
     {

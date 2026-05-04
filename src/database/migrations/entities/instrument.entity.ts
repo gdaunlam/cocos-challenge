@@ -1,17 +1,23 @@
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+
+export type InstrumentType = 'ACCIONES' | 'MONEDA';
 
 @Entity('instruments')
 export class Instrument {
-  @PrimaryColumn()
-  @ApiProperty({ example: 'USD' })
+  @PrimaryGeneratedColumn()
+  @ApiProperty({ example: 1 })
+  id!: number;
+
+  @Column({ unique: true })
+  @ApiProperty({ example: 'ARS' })
+  ticker!: string;
+
+  @Column()
+  @ApiProperty({ example: 'Peso Argentino' })
   name!: string;
 
   @Column()
-  @ApiProperty({ example: '2024-01-01' })
-  emissionDate!: string;
-
-  @Column('decimal')
-  @ApiProperty({ example: 1000000 })
-  amount!: number;
+  @ApiProperty({ example: 'MONEDA', enum: ['ACCIONES', 'MONEDA'] })
+  type!: InstrumentType;
 }

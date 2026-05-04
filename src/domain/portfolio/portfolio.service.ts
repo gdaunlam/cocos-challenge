@@ -1,0 +1,77 @@
+import { Injectable } from '@nestjs/common';
+import { PortfolioRepository } from './portfolio.repository';
+import { PortfolioStatusBuilder } from '../shared/portfolio-status-builder';
+import { MarketPricesResolver } from '../shared/market-prices-resolver';
+import { cached } from '../shared/cache';
+import { InstrumentStatusMap } from '../shared/instrument-status';
+import { Position, PortfolioBody } from '../../interfaces/portfolio.class';
+
+@Injectable()
+export class PortfolioService {
+  constructor(private readonly portfolioRepository: PortfolioRepository) {}
+
+  @cached('portfolio', function() { return `portfolio:${this.userId}`; })
+  async calculatePortfolio(userId: number): Promise<PortfolioBody> {
+    this.userId = userId;
+
+    const orders = await this.portfolioRepository.findOrdersByUserId(userId);
+    const instruments = await this.portfolioRepository.findAllInstruments();
+    const marketData = await this.portfolioRepository.findAllMarketData();
+
+    const arsInstrument = instruments.find(i => i.type === 'MONEDA');
+    if (!arsInstrument) {
+      throw new Error('ARS instrument not found');
+    }
+
+    const processor = new PortfolioStatusBuilder(arsInstrument.id);
+    const instrumentMap = processor.process(orders);
+
+    const arsStatus = instrumentMap.get(arsInstrument.id);
+    const cash = arsStatus?.debit || 0;
+
+    const positions = this.calculatePositions(instrumentMap, orders, marketData, instruments);
+    const positionsValue = positions.reduce((sum, p) => sum + p.marketValue, 0);
+    const totalValue = cash + positionsValue;
+
+    return {
+      totalValue,
+      availableCash: cash,
+      positions
+    };
+  }
+
+  private userId!: number;
+
+  private calculatePositions(
+    instrumentMap: InstrumentStatusMap,
+    orders: any[],
+    marketData: any[],
+    instruments: any[]
+  ): Position[] {
+    const positions: Position[] = [];
+    const latestPrices = MarketPricesResolver.getLatestPricesMap(orders, marketData);
+
+    for (const [instrumentId, status] of instrumentMap) {
+      if (status.holdings === 0) continue;
+      const instrument = instruments.find((i: any) => i.id === instrumentId);
+      if (!instrument || instrument.type === 'MONEDA') continue;
+      const currentPrice = latestPrices.get(instrumentId);
+      if (!currentPrice) continue;
+      const marketValue = status.holdings * currentPrice;
+      const costBasis = status.debit;
+      const totalReturn = marketValue - costBasis;
+      const totalReturnPercentage = costBasis !== 0 ? (totalReturn / costBasis) * 100 : 0;
+
+      positions.push({
+        ticker: instrument.ticker,
+        name: instrument.name,
+        quantity: status.holdings,
+        marketValue,
+        totalReturn,
+        totalReturnPercentage
+      });
+    }
+
+    return positions;
+  }
+}
