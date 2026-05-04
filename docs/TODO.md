@@ -60,7 +60,6 @@
         casos de uso
         arquitectura
         no romper si no hace falta en los endpoints
-        trabajar con arrays de ids para la persistencia
     documentación
         funcionamiento del sistema por topicos
         diagrama
@@ -69,11 +68,11 @@
 
 ---
 
-## REST API (Faltante)
+## REST API (Hecho)
 
 Implementar API REST con Express o NestJS.
 
-### Endpoints requeridos
+### Endpoints implementados
 
 1. **GET /portfolio/:userId**
    - Retorna `PortfolioBody` con totalValue, availableCash, positions
@@ -92,11 +91,11 @@ Implementar API REST con Express o NestJS.
 ### Notas de implementación
 
 - No requiere autenticación (según consigna)
-- El test funcional sobre crear órdenes ya existe en `src/domain/order/__tests__/order.test.ts`
+- El test funcional sobre crear órdenes ya existe en `src/domain/order/order.service.spec.ts`
 
 ---
 
-## Base de datos PostgreSQL (Faltante)
+## Base de datos PostgreSQL (Hecho)
 
 Reemplazar datos en memoria (`data.json`) con conexión real a PostgreSQL.
 
@@ -129,11 +128,11 @@ CREATE INDEX idx_instruments_name_trgm ON instruments USING gin (name gin_trgm_o
 
 ---
 
-## Búsqueda con similarity - pg_trgm (Faltante)
+## Búsqueda con similarity - pg_trgm (Hecho)
 
 Implementar búsqueda de instrumentos usando `similarity()` de PostgreSQL.
 
-### SQL necesario (ya documentado en SOLUTION.md)
+### SQL implementado
 
 ```sql
 -- searchBy = 'ticker'
@@ -154,9 +153,9 @@ LIMIT {limit} OFFSET {offset};
 
 ### Implementación
 
-1. Agregar método `findWithSimilarity(query, searchBy, type, limit, offset)` a `InstrumentRepository`
-2. Usar `pg_trgm` extension para `similarity()`
-3. Actualizar `InstrumentSearchService` para usar el nuevo método (reemplazar filtering in-memory)
+1. Migration `1700000000003-AddPgTrgmIndexes` crea índices gin con pg_trgm
+2. Método `findWithSimilarity(query, searchBy, type, limit, offset)` en `InstrumentRepository`
+3. `InstrumentSearchService` usa el nuevo método en lugar de filtering in-memory
 
 ---
 

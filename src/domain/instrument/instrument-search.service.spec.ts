@@ -10,6 +10,29 @@ const createMockRepository = (overrides?: Partial<InstrumentRepository>): Instru
   findAll: jest.fn().mockResolvedValue(instruments),
   findByType: jest.fn().mockResolvedValue(instruments.filter(i => i.type === 'ACCIONES')),
   findById: jest.fn().mockResolvedValue(null),
+  findWithSimilarity: jest.fn().mockImplementation((query: string, searchBy: 'ticker' | 'name' | 'both', type?: InstrumentType, limit = 10, offset = 0) => {
+    const q = query.toLowerCase();
+    const scored = instruments
+      .filter(i => !type || i.type === type)
+      .map(i => {
+        let score = 0;
+        if (searchBy === 'ticker' || searchBy === 'both') {
+          if (i.ticker.toLowerCase() === q) score = 1;
+          else if (i.ticker.toLowerCase().startsWith(q)) score = 0.9;
+          else if (i.ticker.toLowerCase().includes(q)) score = 0.6;
+        }
+        if (searchBy === 'name' || searchBy === 'both') {
+          if (i.name.toLowerCase() === q) score = Math.max(score, 1);
+          else if (i.name.toLowerCase().startsWith(q)) score = Math.max(score, 0.9);
+          else if (i.name.toLowerCase().includes(q)) score = Math.max(score, 0.6);
+        }
+        return { instrument: i, score };
+      })
+      .filter(r => r.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(offset, offset + limit);
+    return Promise.resolve(scored);
+  }),
   ...overrides,
 });
 

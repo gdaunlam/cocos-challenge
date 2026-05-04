@@ -94,27 +94,6 @@ describe('App E2E Tests', () => {
     });
   });
 
-  describe('Health Endpoint (Error Handling)', () => {
-    it('GET /instruments/health - should return 500 with error and traceId', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/instruments/health')
-        .expect(500);
-
-      expect(response.body).toHaveProperty('statusCode', 500);
-      expect(response.body).toHaveProperty('traceId');
-      expect(response.body).toHaveProperty('message');
-      expect(response.body).toHaveProperty('path', '/instruments/health');
-      expect(response.body).toHaveProperty('timestamp');
-    });
-
-    it('GET /instruments/health - should return 500 with Internal server error', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/instruments/health');
-
-      expect(response.body.message).toBe('Internal server error');
-    });
-  });
-
   describe('Trace ID Integration', () => {
     it('should use provided x-trace-id header', async () => {
       const customTraceId = 'e2e-custom-trace-123';

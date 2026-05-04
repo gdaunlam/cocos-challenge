@@ -3,25 +3,18 @@ import { OrderRepository } from './order.repository';
 import { MarketPricesResolver } from '../shared/market-prices-resolver';
 import { PortfolioStatusBuilder } from '../shared/portfolio-status-builder';
 import { cacheService } from '../shared/cache';
-import { Instrument } from '../../database/migrations/entities/instrument.entity';
-import { MarketData } from '../../database/migrations/entities/marketdata.entity';
 import { Order } from '../../database/migrations/entities/order.entity';
 import { CreateOrderInput, CreateOrderResult } from './order.interface';
+import { InstrumentRepository } from '../instrument/instrument.repository';
+import { MarketDataRepository } from '../marketdata/marketdata.repository';
 
 @Injectable()
 export class OrderService {
-  private marketData: MarketData[] = [];
-  private instruments: Instrument[] = [];
-
-  constructor(private readonly orderRepository: OrderRepository) {}
-
-  setMarketData(marketData: MarketData[]): void {
-    this.marketData = marketData;
-  }
-
-  setInstruments(instruments: Instrument[]): void {
-    this.instruments = instruments;
-  }
+  constructor(
+    private readonly orderRepository: OrderRepository,
+    private readonly instrumentRepository: InstrumentRepository,
+    private readonly marketDataRepository: MarketDataRepository,
+  ) {}
 
   async createOrder(input: CreateOrderInput): Promise<CreateOrderResult> {
     if (!input.instrumentId || input.instrumentId <= 0) {
@@ -47,9 +40,14 @@ export class OrderService {
       throw new Error('Price must be greater than 0');
     }
 
-    const orders = await this.orderRepository.findAll();
+    const [orders, marketData, instruments] = await Promise.all([
+      this.orderRepository.findAll(),
+      this.marketDataRepository.findAll(),
+      this.instrumentRepository.findAll(),
+    ]);
+
     const effectivePrice = isMarket
-      ? MarketPricesResolver.getMarketPrice(orders, this.marketData, input.instrumentId)
+      ? MarketPricesResolver.getMarketPrice(orders, marketData, input.instrumentId)
       : input.price!;
 
     const effectiveSize = hasQuantity
@@ -60,7 +58,7 @@ export class OrderService {
       throw new Error('Order size must be greater than 0');
     }
 
-    const arsInstrument = this.instruments.find(i => i.type === 'MONEDA');
+    const arsInstrument = instruments.find(i => i.type === 'MONEDA');
     if (!arsInstrument) {
       throw new Error('ARS instrument not found');
     }

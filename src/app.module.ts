@@ -4,6 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { configuration } from './config/configuration';
 import { InstrumentModule } from './domain/instrument/instrument.module';
+import { MarketDataModule } from './domain/marketdata/marketdata.module';
+import { OrderModule } from './domain/order/order.module';
+import { PortfolioModule } from './domain/portfolio/portfolio.module';
 import { TraceInterceptor } from './tracer/trace.interceptor';
 import { TraceExceptionFilter } from './tracer/trace.filter';
 import { TraceMiddleware } from './tracer/trace.middleware';
@@ -36,6 +39,9 @@ import { IDatabaseConfig } from './database/environment';
       },
     }),
     InstrumentModule,
+    MarketDataModule,
+    OrderModule,
+    PortfolioModule,
   ],
   providers: [
     {

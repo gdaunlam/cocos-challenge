@@ -5,18 +5,26 @@ import { MarketPricesResolver } from '../shared/market-prices-resolver';
 import { cached } from '../shared/cache';
 import { InstrumentStatusMap } from '../shared/instrument-status';
 import { Position, PortfolioBody } from './portfolio.interface';
+import { InstrumentRepository } from '../instrument/instrument.repository';
+import { MarketDataRepository } from '../marketdata/marketdata.repository';
 
 @Injectable()
 export class PortfolioService {
-  constructor(private readonly portfolioRepository: PortfolioRepository) {}
+  constructor(
+    private readonly portfolioRepository: PortfolioRepository,
+    private readonly instrumentRepository: InstrumentRepository,
+    private readonly marketDataRepository: MarketDataRepository,
+  ) {}
 
   @cached('portfolio', function() { return `portfolio:${this.userId}`; })
   async calculatePortfolio(userId: number): Promise<PortfolioBody> {
     this.userId = userId;
 
-    const orders = await this.portfolioRepository.findOrdersByUserId(userId);
-    const instruments = await this.portfolioRepository.findAllInstruments();
-    const marketData = await this.portfolioRepository.findAllMarketData();
+    const [orders, instruments, marketData] = await Promise.all([
+      this.portfolioRepository.findOrdersByUserId(userId),
+      this.instrumentRepository.findAll(),
+      this.marketDataRepository.findAll(),
+    ]);
 
     const arsInstrument = instruments.find(i => i.type === 'MONEDA');
     if (!arsInstrument) {

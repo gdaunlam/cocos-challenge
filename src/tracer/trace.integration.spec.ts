@@ -150,7 +150,7 @@ describe('Trace Integration (Middleware → Interceptor → Filter)', () => {
 
       const mockRequest = {
         method: 'GET',
-        url: '/instruments/health',
+        url: '/instruments/search',
         headers: { 'user-agent': 'test-agent' },
       };
       const mockResponse = {};
@@ -192,7 +192,7 @@ describe('Trace Integration (Middleware → Interceptor → Filter)', () => {
       };
       const mockRequest = {
         method: 'GET',
-        url: '/instruments/health',
+        url: '/instruments/search',
       };
       const mockHost = {
         switchToHttp: () => ({
@@ -309,7 +309,7 @@ describe('Trace Integration (Middleware → Interceptor → Filter)', () => {
       };
       const mockRequest = {
         method: 'GET',
-        url: '/instruments/health',
+        url: '/instruments/search',
       };
       const mockHost = {
         switchToHttp: () => ({
@@ -322,7 +322,7 @@ describe('Trace Integration (Middleware → Interceptor → Filter)', () => {
 
       expect(mockResponse.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          path: '/instruments/health',
+          path: '/instruments/search',
         }),
       );
     });

@@ -1,5 +1,5 @@
 ---
-session_id: ses_postgres_migration_2026-05-03
+session_id: ses_21196a350ffeFMmdF4HhRNmqDu
 date: 2026-05-03T12:33:23.238Z
 title: Migrate instruments from JSON to PostgreSQL with TypeORM
 ---
@@ -31,4 +31,5 @@ Replaced `data/instruments.json` file-based storage with PostgreSQL database usi
 | STANDARDS.md | Added TypeORM centralized structure guidelines |
 
 ## Related
-Next: Run `docker-compose up -d` then `npm run migration:run` to apply migrations
+- Next: Run `docker-compose up -d` then `npm run migration:run` to apply migrations
+- Sucesor: ses_20c28fc4dffeMaH1xsMhd4umYm (consolidó todas las entities de dummy)

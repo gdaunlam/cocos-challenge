@@ -1,12 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InstrumentRepository } from './instrument.repository';
-import { Instrument, InstrumentType } from '../../database/migrations/entities/instrument.entity';
 import { cached } from '../shared/cache';
 import {
   SearchInstrumentsInput,
   SearchInstrumentsOutput,
-  SearchInstrumentsResult,
-  SearchBy
+  SearchBy,
 } from './instrument-search.interface';
 
 @Injectable()
@@ -18,24 +16,41 @@ export class InstrumentSearchService {
   )
   async search(input: SearchInstrumentsInput): Promise<SearchInstrumentsOutput> {
     this.validateInput(input);
-    const searchBy = input.searchBy ?? 'both';
-
-    const instruments = await this.repository.findAll();
-    const filtered = this.filterByType(instruments, input.type);
-
-    const scored = this.scoreInstruments(filtered, input.query, searchBy);
-    const sorted = this.sortByScore(scored);
-
-    const total = sorted.length;
-    const totalPages = Math.ceil(total / input.limit);
+    const searchBy: SearchBy = input.searchBy ?? 'both';
+    const limit = input.limit;
     const offset = (input.page - 1) * input.limit;
-    const paginated = sorted.slice(offset, offset + input.limit);
+
+    const searchResults = await this.repository.findWithSimilarity(
+      input.query,
+      searchBy,
+      input.type,
+      limit,
+      offset,
+    );
+
+    const results = searchResults.map(r => ({
+      id: r.instrument.id,
+      ticker: r.instrument.ticker,
+      name: r.instrument.name,
+      type: r.instrument.type,
+      score: r.score,
+    }));
+
+    const totalResults = await this.repository.findWithSimilarity(
+      input.query,
+      searchBy,
+      input.type,
+      10000,
+      0,
+    );
+    const total = totalResults.length;
+    const totalPages = Math.ceil(total / limit);
 
     return {
-      results: paginated,
+      results,
       pagination: {
         page: input.page,
-        limit: input.limit,
+        limit,
         total,
         totalPages,
       },
@@ -52,47 +67,5 @@ export class InstrumentSearchService {
     if (input.limit <= 0) {
       throw new Error('limit must be a positive number');
     }
-  }
-
-  private filterByType(instruments: Instrument[], type?: InstrumentType): Instrument[] {
-    if (!type) return instruments;
-    return instruments.filter(i => i.type === type);
-  }
-
-  private scoreInstruments(instruments: Instrument[], query: string, searchBy: SearchBy): SearchInstrumentsResult[] {
-    const q = query.toLowerCase();
-    return instruments.map(inst => ({
-      id: inst.id,
-      ticker: inst.ticker,
-      name: inst.name,
-      type: inst.type,
-      score: this.calculateScore(inst, q, searchBy),
-    }));
-  }
-
-  private calculateScore(inst: Instrument, query: string, searchBy: SearchBy): number {
-    const ticker = inst.ticker.toLowerCase();
-    const name = inst.name.toLowerCase();
-
-    if (searchBy === 'ticker') {
-      return this.calculateFieldScore(ticker, query, 1.0);
-    }
-    if (searchBy === 'name') {
-      return this.calculateFieldScore(name, query, 1.0);
-    }
-    const tickerScore = this.calculateFieldScore(ticker, query, 0.7);
-    const nameScore = this.calculateFieldScore(name, query, 0.3);
-    return Math.max(tickerScore, nameScore);
-  }
-
-  private calculateFieldScore(field: string, query: string, weight: number): number {
-    if (field === query) return weight;
-    if (field.startsWith(query)) return weight * 0.9;
-    if (field.includes(query)) return weight * 0.6;
-    return 0;
-  }
-
-  private sortByScore(results: SearchInstrumentsResult[]): SearchInstrumentsResult[] {
-    return results.sort((a, b) => b.score - a.score);
   }
 }

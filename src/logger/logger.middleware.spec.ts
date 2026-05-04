@@ -30,7 +30,7 @@ describe('LoggerMiddleware', () => {
     it('should log with trace ID, method, url and user-agent', () => {
       const mockRequest = {
         method: 'GET',
-        url: '/instruments/health',
+        url: '/instruments/search',
         headers: { 'user-agent': 'curl/7.68.0' },
       };
       const mockResponse = {};
@@ -41,7 +41,7 @@ describe('LoggerMiddleware', () => {
       });
 
       expect(loggedMessages[0]).toBe(
-        '[test-trace-123] GET /instruments/health - curl/7.68.0',
+        '[test-trace-123] GET /instruments/search - curl/7.68.0',
       );
       expect(mockNext).toHaveBeenCalled();
     });
@@ -115,7 +115,7 @@ describe('LoggerMiddleware', () => {
     it('should call next() to allow request to continue', () => {
       const mockRequest = {
         method: 'GET',
-        url: '/health',
+        url: '/instruments/search',
         headers: {},
       };
       const mockResponse = {};
