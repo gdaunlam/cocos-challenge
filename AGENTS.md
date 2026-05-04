@@ -131,10 +131,10 @@ Before implementing ANY change, you MUST check for potential conflicts with exis
 
 ## Code Standards (MANDATORY)
 
-**You MUST follow the standards defined in `STANDARDS.md`.** Read it before starting any implementation.
+**You MUST follow the standards defined in `docs/STANDARDS.md`.** Read it before starting any implementation.
 
 ```bash
-cat STANDARDS.md
+cat docs/STANDARDS.md
 ```
 
 ### Quick Reference
