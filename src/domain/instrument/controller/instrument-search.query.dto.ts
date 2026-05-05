@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsEnum, IsOptional, IsNumber, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { InstrumentType } from '../../../database/migrations/entities/instrument.entity';
+import { InstrumentType } from '../../../database/entities/instrument.entity';
 
 export class SearchInstrumentsQueryDto {
   @ApiProperty({ description: 'Search query (min 3 characters)', name: 'q' })
@@ -9,9 +9,9 @@ export class SearchInstrumentsQueryDto {
   @IsString()
   q!: string;
 
-  @ApiProperty({ required: false, enum: ['ACCIONES', 'MONEDA'] })
+  @ApiProperty({ required: false, enum: InstrumentType })
   @IsOptional()
-  @IsEnum(['ACCIONES', 'MONEDA'])
+  @IsEnum(InstrumentType)
   type?: InstrumentType;
 
   @ApiProperty({ required: false, enum: ['ticker', 'name', 'both'], default: 'both' })

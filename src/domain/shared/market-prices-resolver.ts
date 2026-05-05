@@ -1,5 +1,5 @@
-import { Order } from '../../database/migrations/entities/order.entity';
-import { MarketData } from '../../database/migrations/entities/marketdata.entity';
+import { Order, Status } from '../../database/entities/order.entity';
+import { MarketData } from '../../database/entities/marketdata.entity';
 
 export class MarketPricesResolver {
   static getMarketPrice(
@@ -21,7 +21,7 @@ export class MarketPricesResolver {
   ): Map<number, number> {
     const priceMap = new Map<number, number>();
 
-    const filledOrders = orders.filter(o => o.status === 'FILLED');
+    const filledOrders = orders.filter(o => o.status === Status.FILLED);
     const sortedOrders = [...filledOrders].sort(
       (a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime()
     );

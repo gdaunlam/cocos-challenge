@@ -1,7 +1,7 @@
 const data = require('../../../../data/data.json');
 import { InstrumentSearchService } from './instrument-search.service';
 import { InstrumentRepositoryImpl } from '../repository/instrument.repository.impl';
-import { Instrument, InstrumentType } from '../../../database/migrations/entities/instrument.entity';
+import { Instrument, InstrumentType } from '../../../database/entities/instrument.entity';
 
 const instruments = data.instruments as Instrument[];
 
@@ -9,8 +9,6 @@ type SearchResult = { instrument: Instrument; score: number };
 
 const createMockRepository = (overrides?: Partial<InstrumentRepositoryImpl>): InstrumentRepositoryImpl => ({
   findAll: jest.fn().mockResolvedValue(instruments),
-  findByType: jest.fn().mockResolvedValue(instruments.filter(i => i.type === 'ACCIONES')),
-  findById: jest.fn().mockResolvedValue(null),
   findWithSimilarity: jest.fn().mockImplementation((query: string, searchBy: 'ticker' | 'name' | 'both', type?: InstrumentType, limit = 10, offset = 0) => {
     const q = query.toLowerCase();
     const scored = instruments
@@ -67,10 +65,10 @@ describe('InstrumentSearchService', () => {
   });
 
   it('should filter by type when provided', async () => {
-    const result = await service.search({ query: 'arg', page: 1, limit: 10, type: 'MONEDA' as InstrumentType });
+    const result = await service.search({ query: 'arg', page: 1, limit: 10, type: InstrumentType.MONEDA });
 
     for (const r of result.results) {
-      expect(r.type).toBe('MONEDA');
+      expect(r.type).toBe(InstrumentType.MONEDA);
     }
   });
 

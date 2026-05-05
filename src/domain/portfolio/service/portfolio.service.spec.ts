@@ -4,9 +4,9 @@ import { PortfolioRepositoryImpl } from '../repository/portfolio.repository.impl
 import { InstrumentRepositoryImpl } from '../../instrument/repository/instrument.repository.impl';
 import { MarketDataRepositoryImpl } from '../../marketdata/repository/marketdata.repository.impl';
 import { cacheService } from '../../shared/cache';
-import { Order } from '../../../database/migrations/entities/order.entity';
-import { Instrument } from '../../../database/migrations/entities/instrument.entity';
-import { MarketData } from '../../../database/migrations/entities/marketdata.entity';
+import { Order } from '../../../database/entities/order.entity';
+import { Instrument } from '../../../database/entities/instrument.entity';
+import { MarketData } from '../../../database/entities/marketdata.entity';
 
 const orders = data.orders as Order[];
 const instruments = data.instruments as Instrument[];
@@ -14,20 +14,16 @@ const marketData = data.marketdata as MarketData[];
 
 const createMockPortfolioRepository = (overrides?: Partial<PortfolioRepositoryImpl>): PortfolioRepositoryImpl => ({
   findOrdersByUserId: jest.fn().mockResolvedValue(orders.filter(o => o.userId === 1)),
-  findAllOrders: jest.fn().mockResolvedValue(orders),
   ...overrides,
 } as unknown as PortfolioRepositoryImpl);
 
 const createMockInstrumentRepository = (): InstrumentRepositoryImpl => ({
   findAll: jest.fn().mockResolvedValue(instruments),
-  findByType: jest.fn(),
-  findById: jest.fn(),
   findWithSimilarity: jest.fn().mockResolvedValue([]),
 } as unknown as InstrumentRepositoryImpl);
 
 const createMockMarketDataRepository = (): MarketDataRepositoryImpl => ({
   findAll: jest.fn().mockResolvedValue(marketData),
-  findByInstrumentId: jest.fn(),
 } as unknown as MarketDataRepositoryImpl);
 
 describe('PortfolioService', () => {

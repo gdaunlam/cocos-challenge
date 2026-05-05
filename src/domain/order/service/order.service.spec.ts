@@ -4,18 +4,15 @@ import { OrderRepositoryImpl } from '../repository/order.repository.impl';
 import { InstrumentRepositoryImpl } from '../../instrument/repository/instrument.repository.impl';
 import { MarketDataRepositoryImpl } from '../../marketdata/repository/marketdata.repository.impl';
 import { cacheService } from '../../shared/cache';
-import { Order, Side } from '../../../database/migrations/entities/order.entity';
-import { MarketData } from '../../../database/migrations/entities/marketdata.entity';
-import { Instrument } from '../../../database/migrations/entities/instrument.entity';
+import { Order, OrderType, Side, Status } from '../../../database/entities/order.entity';
+import { MarketData } from '../../../database/entities/marketdata.entity';
+import { Instrument } from '../../../database/entities/instrument.entity';
 
 const orders = data.orders as Order[];
 const marketData = data.marketdata as MarketData[];
 const instruments = data.instruments as Instrument[];
 
 const createMockOrderRepository = (overrides?: Partial<OrderRepositoryImpl>): OrderRepositoryImpl => ({
-  findByUserId: jest.fn().mockImplementation((userId: number) =>
-    Promise.resolve(orders.filter(o => o.userId === userId))
-  ),
   findAll: jest.fn().mockResolvedValue(orders),
   save: jest.fn().mockImplementation((order: Order) => Promise.resolve({ ...order, id: 100 })),
   ...overrides,
@@ -23,14 +20,11 @@ const createMockOrderRepository = (overrides?: Partial<OrderRepositoryImpl>): Or
 
 const createMockInstrumentRepository = (): InstrumentRepositoryImpl => ({
   findAll: jest.fn().mockResolvedValue(instruments),
-  findByType: jest.fn(),
-  findById: jest.fn(),
   findWithSimilarity: jest.fn().mockResolvedValue([]),
 } as unknown as InstrumentRepositoryImpl);
 
 const createMockMarketDataRepository = (): MarketDataRepositoryImpl => ({
   findAll: jest.fn().mockResolvedValue(marketData),
-  findByInstrumentId: jest.fn(),
 } as unknown as MarketDataRepositoryImpl);
 
 describe('OrderService', () => {
@@ -65,9 +59,9 @@ describe('OrderService', () => {
         price: undefined,
       });
 
-      expect(result.order.status).toBe('FILLED');
-      expect(result.order.side).toBe('BUY');
-      expect(result.order.type).toBe('MARKET');
+      expect(result.order.status).toBe(Status.FILLED);
+      expect(result.order.side).toBe(Side.BUY);
+      expect(result.order.type).toBe(OrderType.MARKET);
     });
 
     it('BUY LIMIT with quantity: valid order should be NEW', async () => {
@@ -80,14 +74,14 @@ describe('OrderService', () => {
       const result = await service.createOrder({
         instrumentId: 1,
         userId: 1,
-        side: 'BUY' as Side,
+        side: Side.BUY,
         quantity: 10,
         price: 200,
       });
 
-      expect(result.order.status).toBe('NEW');
-      expect(result.order.side).toBe('BUY');
-      expect(result.order.type).toBe('LIMIT');
+      expect(result.order.status).toBe(Status.NEW);
+      expect(result.order.side).toBe(Side.BUY);
+      expect(result.order.type).toBe(OrderType.LIMIT);
     });
 
     it('BUY without funds should be REJECTED', async () => {
@@ -100,12 +94,12 @@ describe('OrderService', () => {
       const result = await service.createOrder({
         instrumentId: 1,
         userId: 1,
-        side: 'BUY' as Side,
+        side: Side.BUY,
         quantity: 10000000,
         price: 1000,
       });
 
-      expect(result.order.status).toBe('REJECTED');
+      expect(result.order.status).toBe(Status.REJECTED);
     });
 
     it('BUY with amount: should calculate max shares and be FILLED (MARKET)', async () => {
@@ -118,15 +112,15 @@ describe('OrderService', () => {
       const result = await service.createOrder({
         instrumentId: 47,
         userId: 1,
-        side: 'BUY' as Side,
+        side: Side.BUY,
         amount: 50000,
         price: undefined,
       });
 
       const maxShares = Math.floor(50000 / result.order.price);
       expect(result.order.size).toBe(maxShares);
-      expect(result.order.status).toBe('FILLED');
-      expect(result.order.type).toBe('MARKET');
+      expect(result.order.status).toBe(Status.FILLED);
+      expect(result.order.type).toBe(OrderType.MARKET);
     });
   });
 
@@ -141,14 +135,14 @@ describe('OrderService', () => {
       const result = await service.createOrder({
         instrumentId: 47,
         userId: 1,
-        side: 'SELL' as Side,
+        side: Side.SELL,
         quantity: 10,
         price: undefined,
       });
 
-      expect(result.order.status).toBe('FILLED');
-      expect(result.order.side).toBe('SELL');
-      expect(result.order.type).toBe('MARKET');
+      expect(result.order.status).toBe(Status.FILLED);
+      expect(result.order.side).toBe(Side.SELL);
+      expect(result.order.type).toBe(OrderType.MARKET);
     });
 
     it('SELL LIMIT with quantity: valid order should be NEW', async () => {
@@ -161,14 +155,14 @@ describe('OrderService', () => {
       const result = await service.createOrder({
         instrumentId: 47,
         userId: 1,
-        side: 'SELL' as Side,
+        side: Side.SELL,
         quantity: 10,
         price: 900,
       });
 
-      expect(result.order.status).toBe('NEW');
-      expect(result.order.side).toBe('SELL');
-      expect(result.order.type).toBe('LIMIT');
+      expect(result.order.status).toBe(Status.NEW);
+      expect(result.order.side).toBe(Side.SELL);
+      expect(result.order.type).toBe(OrderType.LIMIT);
     });
 
     it('SELL without holdings should be REJECTED', async () => {
@@ -181,12 +175,12 @@ describe('OrderService', () => {
       const result = await service.createOrder({
         instrumentId: 47,
         userId: 1,
-        side: 'SELL' as Side,
+        side: Side.SELL,
         quantity: 10000,
         price: 900,
       });
 
-      expect(result.order.status).toBe('REJECTED');
+      expect(result.order.status).toBe(Status.REJECTED);
     });
   });
 
@@ -201,7 +195,7 @@ describe('OrderService', () => {
       await expect(service.createOrder({
         instrumentId: 1,
         userId: 1,
-        side: 'BUY' as Side,
+        side: Side.BUY,
       })).rejects.toThrow('quantity or amount is required');
     });
 
@@ -215,7 +209,7 @@ describe('OrderService', () => {
       await expect(service.createOrder({
         instrumentId: 1,
         userId: 1,
-        side: 'BUY' as Side,
+        side: Side.BUY,
         quantity: 10,
         amount: 1000,
       })).rejects.toThrow('cannot specify both quantity and amount');
@@ -231,7 +225,7 @@ describe('OrderService', () => {
       await expect(service.createOrder({
         instrumentId: 1,
         userId: 1,
-        side: 'BUY' as Side,
+        side: Side.BUY,
         quantity: 10,
         price: 0,
       })).rejects.toThrow('Price must be greater than 0');
@@ -247,7 +241,7 @@ describe('OrderService', () => {
       await expect(service.createOrder({
         instrumentId: 47,
         userId: 1,
-        side: 'BUY' as Side,
+        side: Side.BUY,
         amount: 100,
         price: 1000,
       })).rejects.toThrow('Order size must be greater than 0');
@@ -263,7 +257,7 @@ describe('OrderService', () => {
       await expect(service.createOrder({
         instrumentId: 9999,
         userId: 1,
-        side: 'BUY' as Side,
+        side: Side.BUY,
         quantity: 10,
       })).rejects.toThrow('No market price available for instrument');
     });
@@ -278,7 +272,7 @@ describe('OrderService', () => {
       await expect(service.createOrder({
         instrumentId: 0,
         userId: 1,
-        side: 'BUY' as Side,
+        side: Side.BUY,
         quantity: 10,
       })).rejects.toThrow('instrumentId must be a positive number');
     });
@@ -293,7 +287,7 @@ describe('OrderService', () => {
       await expect(service.createOrder({
         instrumentId: 1,
         userId: -1,
-        side: 'BUY' as Side,
+        side: Side.BUY,
         quantity: 10,
       })).rejects.toThrow('userId must be a positive number');
     });
@@ -310,7 +304,7 @@ describe('OrderService', () => {
       const result = await service.createOrder({
         instrumentId: 47,
         userId: 1,
-        side: 'BUY' as Side,
+        side: Side.BUY,
         quantity: 10,
         price: undefined,
       });
@@ -320,13 +314,13 @@ describe('OrderService', () => {
         .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime())[0]?.close;
 
       const latestFilledOrder = orders
-        .filter(o => o.instrumentId === 47 && o.status === 'FILLED')
+        .filter(o => o.instrumentId === 47 && o.status === Status.FILLED)
         .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime())[0];
 
       const expectedPrice = latestFilledOrder ? latestFilledOrder.price : marketPrice;
 
       expect(result.order.price).toBe(expectedPrice);
-      expect(result.order.type).toBe('MARKET');
+      expect(result.order.type).toBe(OrderType.MARKET);
     });
   });
 });

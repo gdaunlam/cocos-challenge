@@ -11,6 +11,7 @@ Created Postman collection with {{baseUrl}} variable and sample data for all 3 A
 | File | Change |
 |------|--------|
 | docs/POSTMAN/nest-alive-api.postman_collection.json | Created Postman collection v2.1.0 |
+| src/domain/instrument/repository/instrument.repository.impl.ts | Pre-define 3 SQL queries for ticker/name/both searchBy modes instead of building dynamically |
 
 ## Related
 None

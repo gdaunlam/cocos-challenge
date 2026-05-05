@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Instrument, InstrumentType } from '../../../database/migrations/entities/instrument.entity';
+import { Instrument, InstrumentType } from '../../../database/entities/instrument.entity';
 
 type SearchResult = { instrument: Instrument; score: number };
 type SearchBy = 'ticker' | 'name' | 'both';
@@ -14,13 +14,32 @@ export class InstrumentRepositoryImpl {
     return this.repository.find();
   }
 
-  async findByType(type: InstrumentType): Promise<Instrument[]> {
-    return this.repository.find({ where: { type } });
-  }
-
-  async findById(id: number): Promise<Instrument | null> {
-    return this.repository.findOne({ where: { id } });
-  }
+  private readonly QUERIES = {
+    ticker: `
+      SELECT i.*, similarity(i.ticker, $1) AS score
+      FROM instruments i
+      WHERE ($2::text IS NULL OR i.type = $2)
+        AND (similarity(i.ticker, $1) > 0)
+      ORDER BY score DESC
+      LIMIT $3 OFFSET $4
+    `,
+    name: `
+      SELECT i.*, similarity(i.name, $1) AS score
+      FROM instruments i
+      WHERE ($2::text IS NULL OR i.type = $2)
+        AND (similarity(i.name, $1) > 0)
+      ORDER BY score DESC
+      LIMIT $3 OFFSET $4
+    `,
+    both: `
+      SELECT i.*, GREATEST(similarity(i.ticker, $1) * 0.7, similarity(i.name, $1) * 0.3) AS score
+      FROM instruments i
+      WHERE ($2::text IS NULL OR i.type = $2)
+        AND (similarity(i.ticker, $1) > 0 OR similarity(i.name, $1) > 0)
+      ORDER BY score DESC
+      LIMIT $3 OFFSET $4
+    `,
+  } as const;
 
   async findWithSimilarity(
     query: string,
@@ -29,34 +48,8 @@ export class InstrumentRepositoryImpl {
     limit = 10,
     offset = 0,
   ): Promise<SearchResult[]> {
-    let scoreExpression: string;
-    if (searchBy === 'ticker') {
-      scoreExpression = 'similarity(i.ticker, $1)';
-    } else if (searchBy === 'name') {
-      scoreExpression = 'similarity(i.name, $1)';
-    } else {
-      scoreExpression = 'GREATEST(similarity(i.ticker, $1) * 0.7, similarity(i.name, $1) * 0.3)';
-    }
-
-    const havingClause = searchBy === 'ticker'
-      ? 'similarity(i.ticker, $1) > 0'
-      : searchBy === 'name'
-        ? 'similarity(i.name, $1) > 0'
-        : '(similarity(i.ticker, $1) > 0 OR similarity(i.name, $1) > 0)';
-
-    const sql = `
-      SELECT i.*, ${scoreExpression} AS score
-      FROM instruments i
-      WHERE ($${type ? '$2' : 'NULL'}::text IS NULL OR i.type = $${type ? '$2' : '$2'})
-        AND (${havingClause})
-      ORDER BY score DESC
-      LIMIT $${type ? '$3' : '$2'} OFFSET $${type ? '$4' : '$3'}
-    `;
-
-    const params: (string | number | undefined)[] = [query];
-    if (type) params.push(type);
-    params.push(limit);
-    params.push(offset);
+    const sql = this.QUERIES[searchBy];
+    const params: (string | number | null)[] = [query, type ?? null, limit, offset];
 
     const results = await this.repository.query(sql, params);
 

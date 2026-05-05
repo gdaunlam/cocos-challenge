@@ -30,7 +30,7 @@ describe('LoggerMiddleware', () => {
     it('should log with trace ID, method, url and user-agent', () => {
       const mockRequest = {
         method: 'GET',
-        url: '/instruments/search',
+        url: '/instrument/search',
         headers: { 'user-agent': 'curl/7.68.0' },
       };
       const mockResponse = {};
@@ -41,7 +41,7 @@ describe('LoggerMiddleware', () => {
       });
 
       expect(loggedMessages[0]).toBe(
-        '[test-trace-123] GET /instruments/search - curl/7.68.0',
+        '[test-trace-123] GET /instrument/search - curl/7.68.0',
       );
       expect(mockNext).toHaveBeenCalled();
     });
@@ -49,7 +49,7 @@ describe('LoggerMiddleware', () => {
     it('should show correct URL (not just "/") when logging requests', () => {
       const mockRequest = {
         method: 'POST',
-        url: '/instruments',
+        url: '/instrument',
         headers: { 'user-agent': 'test-client' },
       };
       const mockResponse = {};
@@ -59,13 +59,13 @@ describe('LoggerMiddleware', () => {
         middleware.use(mockRequest as any, mockResponse as any, mockNext as any);
       });
 
-      expect(loggedMessages[0]).toContain('/instruments');
+      expect(loggedMessages[0]).toContain('/instrument');
     });
 
     it('should use "-" as default user-agent when not provided', () => {
       const mockRequest = {
         method: 'GET',
-        url: '/instruments',
+        url: '/instrument',
         headers: {},
       };
       const mockResponse = {};
@@ -76,7 +76,7 @@ describe('LoggerMiddleware', () => {
       });
 
       expect(loggedMessages[0]).toBe(
-        '[trace-no-agent] GET /instruments - -',
+        '[trace-no-agent] GET /instrument - -',
       );
     });
 
@@ -97,7 +97,7 @@ describe('LoggerMiddleware', () => {
     it('should handle DELETE method correctly', () => {
       const mockRequest = {
         method: 'DELETE',
-        url: '/instruments/Guitar',
+        url: '/instrument/Guitar',
         headers: { 'user-agent': 'curl/7.68.0' },
       };
       const mockResponse = {};
@@ -108,14 +108,14 @@ describe('LoggerMiddleware', () => {
       });
 
       expect(loggedMessages[0]).toBe(
-        '[delete-trace] DELETE /instruments/Guitar - curl/7.68.0',
+        '[delete-trace] DELETE /instrument/Guitar - curl/7.68.0',
       );
     });
 
     it('should call next() to allow request to continue', () => {
       const mockRequest = {
         method: 'GET',
-        url: '/instruments/search',
+        url: '/instrument/search',
         headers: {},
       };
       const mockResponse = {};

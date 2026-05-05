@@ -1,4 +1,4 @@
-import { InstrumentType } from "../../../database/migrations/entities/instrument.entity";
+import { InstrumentType } from "../../../database/entities/instrument.entity";
 
 export type SearchBy = 'ticker' | 'name' | 'both';
 

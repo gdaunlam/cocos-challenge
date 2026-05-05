@@ -1,4 +1,4 @@
-import { Order } from '../../database/migrations/entities/order.entity';
+import { Order } from '../../database/entities/order.entity';
 import { InstrumentStatus } from './instrument-status';
 
 export interface StrategyContext {

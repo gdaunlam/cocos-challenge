@@ -1,4 +1,4 @@
-import { Order } from '../../database/migrations/entities/order.entity';
+import { Order } from '../../database/entities/order.entity';
 import { InstrumentStatus, InstrumentStatusMap, createEmptyInstrumentStatus } from './instrument-status';
 import { strategies, StrategyContext } from './order-strategies';
 

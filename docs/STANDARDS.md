@@ -199,10 +199,10 @@ Scripts en `package.json`:
 
 | Tipo | Ubicación | Ejemplo |
 |------|-----------|---------|
-| Entities (TypeORM) | `src/database/migrations/entities/` | `import { Instrument } from '../../database/migrations/entities/instrument.entity'` |
+| Entities (TypeORM) | `src/database/entities/` | `import { Instrument } from '../../database/entities/instrument.entity'` |
 | Business interfaces | `src/domain/{entity}/controller/` | `import { IInstrument } from '../../instrument/controller/instrument.interface'` |
 | Request DTOs | `src/domain/{entity}/controller/request/` | `import { CreateInstrumentRequest } from './request/create-instrument.request'` |
-| Services | `../service/{service}` | `import { InstrumentGetService } from '../service/instrument-get.service'` |
+| Services | `../service/{service}` |
 | Repositories | `../repository/{repository}` | `import { InstrumentRepository } from '../repository/instrument.repository.interface'` |
 
 ---
@@ -270,7 +270,7 @@ Antes de modificar el Service, consultar si el cambio es necesario o si solo se 
 
 - [ ] ¿Nuevo módulo en `src/domain/`?
 - [ ] ¿Request DTO con `class-validator` y `@ApiProperty`?
-- [ ] ¿Entity TypeORM en `src/database/migrations/entities/` con `@ApiProperty`?
+- [ ] ¿Entity TypeORM en `src/database/entities/` con `@ApiProperty`?
 - [ ] ¿Migración en `src/database/migrations/`?
 - [ ] ¿Middleware registrado en `app.module.ts`?
 - [ ] ¿`next()` dentro de `runWithTraceId()`?

@@ -1,9 +1,22 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
-export type Side = 'BUY' | 'SELL' | 'CASH_IN' | 'CASH_OUT';
-export type Status = 'FILLED' | 'NEW' | 'CANCELLED' | 'REJECTED';
-export type OrderType = 'MARKET' | 'LIMIT';
+export enum Side {
+  BUY = 'BUY',
+  SELL = 'SELL',
+  CASH_IN = 'CASH_IN',
+  CASH_OUT = 'CASH_OUT',
+}
+export enum Status {
+  FILLED = 'FILLED',
+  NEW = 'NEW',
+  CANCELLED = 'CANCELLED',
+  REJECTED = 'REJECTED',
+}
+export enum OrderType {
+  MARKET = 'MARKET',
+  LIMIT = 'LIMIT',
+}
 
 @Entity('orders')
 export class Order {
@@ -28,15 +41,15 @@ export class Order {
   price!: number;
 
   @Column()
-  @ApiProperty({ example: 'LIMIT', enum: ['MARKET', 'LIMIT'] })
+  @ApiProperty({ example: 'LIMIT', enum: OrderType })
   type!: OrderType;
 
   @Column()
-  @ApiProperty({ example: 'BUY', enum: ['BUY', 'SELL', 'CASH_IN', 'CASH_OUT'] })
+  @ApiProperty({ example: 'BUY', enum: Side })
   side!: Side;
 
   @Column()
-  @ApiProperty({ example: 'NEW', enum: ['FILLED', 'NEW', 'CANCELLED', 'REJECTED'] })
+  @ApiProperty({ example: 'NEW', enum: Status })
   status!: Status;
 
   @Column()

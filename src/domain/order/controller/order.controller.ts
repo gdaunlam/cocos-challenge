@@ -4,7 +4,7 @@ import { CreateOrderInput } from './order.interface';
 import { OrderService } from '../service/order.service';
 
 @ApiTags('Orders')
-@Controller('orders')
+@Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 

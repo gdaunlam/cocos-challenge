@@ -1,7 +1,10 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
-export type InstrumentType = 'ACCIONES' | 'MONEDA';
+export enum InstrumentType {
+  ACCIONES = 'ACCIONES',
+  MONEDA = 'MONEDA',
+}
 
 @Entity('instruments')
 export class Instrument {
@@ -18,6 +21,6 @@ export class Instrument {
   name!: string;
 
   @Column()
-  @ApiProperty({ example: 'MONEDA', enum: ['ACCIONES', 'MONEDA'] })
+  @ApiProperty({ example: 'MONEDA', enum: InstrumentType })
   type!: InstrumentType;
 }

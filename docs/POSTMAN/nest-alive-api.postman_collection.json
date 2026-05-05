@@ -28,9 +28,9 @@
           }
         },
         "url": {
-          "raw": "{{baseUrl}}/orders",
+          "raw": "{{baseUrl}}/order",
           "host": ["{{baseUrl}}"],
-          "path": ["orders"]
+          "path": ["order"]
         },
         "description": "Create a new order (BUY/SELL/LIMIT/MARKET)"
       },
@@ -43,9 +43,9 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{baseUrl}}/instruments/search?q=apple&type=ACCIONES&searchBy=both&page=1&limit=10",
+          "raw": "{{baseUrl}}/instrument/search?q=apple&type=ACCIONES&searchBy=both&page=1&limit=10",
           "host": ["{{baseUrl}}"],
-          "path": ["instruments", "search"],
+          "path": ["instrument", "search"],
           "query": [
             {
               "key": "q",

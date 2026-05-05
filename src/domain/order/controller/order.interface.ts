@@ -1,4 +1,4 @@
-import { Order, Side } from '../../../database/migrations/entities/order.entity';
+import { Order, Side } from '../../../database/entities/order.entity';
 
 export interface CreateOrderInput {
   instrumentId: number;

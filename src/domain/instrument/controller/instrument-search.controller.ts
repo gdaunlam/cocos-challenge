@@ -5,7 +5,7 @@ import { InstrumentSearchService } from '../service/instrument-search.service';
 import { SearchInstrumentsQueryDto } from './instrument-search.query.dto';
 
 @ApiTags('Instruments')
-@Controller('instruments')
+@Controller('instrument')
 export class InstrumentSearchController {
   constructor(private readonly instrumentSearchService: InstrumentSearchService) {}
 

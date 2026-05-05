@@ -3,11 +3,12 @@ import { OrderRepositoryImpl, SaveOrderDto } from '../repository/order.repositor
 import { MarketPricesResolver } from '../../shared/market-prices-resolver';
 import { PortfolioStatusBuilder } from '../../shared/portfolio-status-builder';
 import { cacheService } from '../../shared/cache';
-import { Order } from '../../../database/migrations/entities/order.entity';
+import { Order, OrderType, Side, Status } from '../../../database/entities/order.entity';
 import { CreateOrderInput, CreateOrderResult } from '../controller/order.interface';
 
 import { MarketDataRepositoryImpl } from '../../marketdata/repository/marketdata.repository.impl';
 import { InstrumentRepositoryImpl } from '../../instrument/repository/instrument.repository.impl';
+import { InstrumentType } from '../../../database/entities/instrument.entity';
 
 @Injectable()
 export class OrderService {
@@ -59,7 +60,7 @@ export class OrderService {
       throw new Error('Order size must be greater than 0');
     }
 
-    const arsInstrument = instruments.find(i => i.type === 'MONEDA');
+    const arsInstrument = instruments.find(i => i.type === InstrumentType.MONEDA);
     if (!arsInstrument) {
       throw new Error('ARS instrument not found');
     }
@@ -72,13 +73,13 @@ export class OrderService {
     const targetStatus = processor.getInstrumentStatus(input.instrumentId);
 
     const totalCost = effectiveSize * effectivePrice;
-    let status: Order['status'] = 'REJECTED';
+    let status: Order['status'] = Status.REJECTED;
 
-    if (input.side === 'BUY' && arsStatus && totalCost <= arsStatus.credit) {
-      status = isMarket ? 'FILLED' : 'NEW';
+    if (input.side === Side.BUY && arsStatus && totalCost <= arsStatus.credit) {
+      status = isMarket ? Status.FILLED : Status.NEW;
     }
-    if (input.side === 'SELL' && targetStatus && effectiveSize <= targetStatus.limit) {
-      status = isMarket ? 'FILLED' : 'NEW';
+    if (input.side === Side.SELL && targetStatus && effectiveSize <= targetStatus.limit) {
+      status = isMarket ? Status.FILLED : Status.NEW;
     }
 
     const newOrder: SaveOrderDto = {
@@ -87,7 +88,7 @@ export class OrderService {
       side: input.side,
       size: effectiveSize,
       price: effectivePrice,
-      type: isMarket ? 'MARKET' : 'LIMIT',
+      type: isMarket ? OrderType.MARKET : OrderType.LIMIT,
       status,
       datetime: new Date().toISOString()
     };

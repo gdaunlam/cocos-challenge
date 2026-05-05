@@ -7,6 +7,7 @@ import { InstrumentStatusMap } from '../../shared/instrument-status';
 import { Position, PortfolioBody } from '../controller/portfolio.interface';
 import { InstrumentRepositoryImpl } from '../../instrument/repository/instrument.repository.impl';
 import { MarketDataRepositoryImpl } from '../../marketdata/repository/marketdata.repository.impl';
+import { InstrumentType } from '../../../database/entities/instrument.entity';
 
 @Injectable()
 export class PortfolioService {
@@ -18,15 +19,13 @@ export class PortfolioService {
 
   @cached('portfolio', function() { return `portfolio:${this.userId}`; })
   async calculatePortfolio(userId: number): Promise<PortfolioBody> {
-    this.userId = userId;
-
     const [orders, instruments, marketData] = await Promise.all([
       this.portfolioRepository.findOrdersByUserId(userId),
       this.instrumentRepository.findAll(),
       this.marketDataRepository.findAll(),
     ]);
 
-    const arsInstrument = instruments.find(i => i.type === 'MONEDA');
+    const arsInstrument = instruments.find(i => i.type === InstrumentType.MONEDA);
     if (!arsInstrument) {
       throw new Error('ARS instrument not found');
     }
@@ -35,8 +34,10 @@ export class PortfolioService {
     const instrumentMap = processor.process(orders);
 
     const arsStatus = instrumentMap.get(arsInstrument.id);
-    const cash = arsStatus?.debit || 0;
-
+    if(!arsStatus) {
+      throw new Error('ARS instrument status not found');
+    }
+    const cash = arsStatus.debit;
     const positions = this.calculatePositions(instrumentMap, orders, marketData, instruments);
     const positionsValue = positions.reduce((sum, p) => sum + p.marketValue, 0);
     const totalValue = cash + positionsValue;
@@ -47,8 +48,6 @@ export class PortfolioService {
       positions
     };
   }
-
-  private userId!: number;
 
   private calculatePositions(
     instrumentMap: InstrumentStatusMap,
@@ -62,7 +61,7 @@ export class PortfolioService {
     for (const [instrumentId, status] of instrumentMap) {
       if (status.holdings === 0) continue;
       const instrument = instruments.find((i: any) => i.id === instrumentId);
-      if (!instrument || instrument.type === 'MONEDA') continue;
+      if (!instrument || instrument.type === InstrumentType.MONEDA) continue;
       const currentPrice = latestPrices.get(instrumentId);
       if (!currentPrice) continue;
       const marketValue = status.holdings * currentPrice;

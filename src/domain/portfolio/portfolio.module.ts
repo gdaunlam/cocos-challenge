@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Order } from '../../database/migrations/entities/order.entity';
-import { MarketData } from '../../database/migrations/entities/marketdata.entity';
-import { Instrument } from '../../database/migrations/entities/instrument.entity';
+import { Order } from '../../database/entities/order.entity';
+import { MarketData } from '../../database/entities/marketdata.entity';
+import { Instrument } from '../../database/entities/instrument.entity';
 import { PortfolioRepositoryImpl } from './repository/portfolio.repository.impl';
 import { PortfolioService } from './service/portfolio.service';
 import { PortfolioController } from './controller/portfolio.controller';
