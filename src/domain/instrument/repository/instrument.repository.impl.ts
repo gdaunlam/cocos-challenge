@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Instrument, InstrumentType } from '../../database/migrations/entities/instrument.entity';
-import { InstrumentRepository, SearchResult, SearchBy } from './instrument.repository';
+import { Instrument, InstrumentType } from '../../../database/migrations/entities/instrument.entity';
+
+type SearchResult = { instrument: Instrument; score: number };
+type SearchBy = 'ticker' | 'name' | 'both';
 
 @Injectable()
-export class InstrumentRepositoryImpl extends InstrumentRepository {
-  constructor(@InjectRepository(Instrument) private readonly repository: Repository<Instrument>) {
-    super();
-  }
+export class InstrumentRepositoryImpl {
+  constructor(@InjectRepository(Instrument) private readonly repository: Repository<Instrument>) {}
 
   async findAll(): Promise<Instrument[]> {
     return this.repository.find();

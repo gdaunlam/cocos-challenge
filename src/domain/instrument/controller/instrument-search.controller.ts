@@ -1,7 +1,7 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { InstrumentSearchService } from './instrument-search.service';
 import { SearchInstrumentsOutput, SearchInstrumentsInput } from './instrument-search.interface';
+import { InstrumentSearchService } from '../service/instrument-search.service';
 import { SearchInstrumentsQueryDto } from './instrument-search.query.dto';
 
 @ApiTags('Instruments')

@@ -25,6 +25,7 @@
     environments
         development, staging, production en .envs/
         Scripts: npm run start:dev, start:staging, start:prod (cross-env)
+        Shell/Docker env vars sobrescriben .envs/ (dotenv no pisareadas si ya existen)
     errors
         handler general: TraceExceptionFilter con APP_FILTER
         manejo de errores custom: HttpException personalizada en trace.filter.ts
@@ -53,113 +54,17 @@
     segurización
         helmet: app.use(helmet()) en main.ts
         cors: app.use(cors()) en main.ts
+    requerimiento
+        REST API
+            3 endpoints: GET /portfolio/:userId, GET /instruments/search, POST /orders
+            Controllers en InstrumentModule, OrderModule, PortfolioModule
+        índices pg_trgm
+            gin indexes en ticker y name para similarity search
+        búsqueda similarity
+            pg_trgm similarity() con scoring ponderado (0.7 ticker, 0.3 name)
 
 ## TODO
     requerimiento
-        aplicación
-        casos de uso
-        arquitectura
-        no romper si no hace falta en los endpoints
-    documentación
-        funcionamiento del sistema por topicos
-        diagrama
-        colección de postman
-        actualizar swagger
-
----
-
-## REST API (Hecho)
-
-Implementar API REST con Express o NestJS.
-
-### Endpoints implementados
-
-1. **GET /portfolio/:userId**
-   - Retorna `PortfolioBody` con totalValue, availableCash, positions
-   - Delegar a `PortfolioService.calculatePortfolio()`
-
-2. **GET /instruments/search?q=&type=&searchBy=&page=&limit=**
-   - Query params: `q` (min 3 chars), `type` (ACCIONES|MONEDA), `searchBy` (ticker|name|both), `page`, `limit`
-   - Retorna `SearchInstrumentsOutput` con results y pagination
-   - Delegar a `InstrumentSearchService.search()`
-
-3. **POST /orders**
-   - Body: `{ instrumentId, userId, side, quantity?, amount?, price? }`
-   - Crear orden via `OrderService.createOrder()`
-   - Retornar la orden creada
-
-### Notas de implementación
-
-- No requiere autenticación (según consigna)
-- El test funcional sobre crear órdenes ya existe en `src/domain/order/order.service.spec.ts`
-
----
-
-## Base de datos PostgreSQL (Hecho)
-
-Reemplazar datos en memoria (`data.json`) con conexión real a PostgreSQL.
-
-### Tablas existentes
-
-```sql
--- users: id, email, accountNumber
--- instruments: id, ticker, name, type
--- orders: id, instrumentId, userId, side, size, price, type, status, datetime
--- marketdata: id, instrumentId, high, low, open, close, previousClose, datetime
-```
-
-### Cambios requeridos
-
-1. **Instalar cliente PostgreSQL** (pg, drizzle, prisma, etc.)
-2. **Crear conexión a DB** con variables de entorno (DATABASE_URL)
-3. **Refactorizar repositories:**
-   - `InstrumentRepository`: queries a `instruments` y `marketdata`
-   - Orders queries para `PortfolioStatusBuilder`
-   - user queries para validación
-4. **Ejecutar queries** en PortfolioService, OrderService, InstrumentSearchService
-
-### Índices recomendados
-
-```sql
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
-CREATE INDEX idx_instruments_ticker_trgm ON instruments USING gin (ticker gin_trgm_ops);
-CREATE INDEX idx_instruments_name_trgm ON instruments USING gin (name gin_trgm_ops);
-```
-
----
-
-## Búsqueda con similarity - pg_trgm (Hecho)
-
-Implementar búsqueda de instrumentos usando `similarity()` de PostgreSQL.
-
-### SQL implementado
-
-```sql
--- searchBy = 'ticker'
-score = similarity(ticker, query)
-
--- searchBy = 'name'
-score = similarity(name, query)
-
--- searchBy = 'both' (default)
-score = GREATEST(
-  similarity(ticker, query) * 0.7,
-  similarity(name, query) * 0.3
-)
-
-ORDER BY score DESC
-LIMIT {limit} OFFSET {offset};
-```
-
-### Implementación
-
-1. Migration `1700000000003-AddPgTrgmIndexes` crea índices gin con pg_trgm
-2. Método `findWithSimilarity(query, searchBy, type, limit, offset)` en `InstrumentRepository`
-3. `InstrumentSearchService` usa el nuevo método en lugar de filtering in-memory
-
----
-
-## Opcional / Nice to have
-
-- Proveer colección Postman, Insomnia o REST Client para la API
-- Ejemplos de invocación de cada endpoint
+        opcional
+            colección postman
+            documentación (diagrama arquitectura)

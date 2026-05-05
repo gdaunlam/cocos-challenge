@@ -10,23 +10,25 @@ Este documento define las convenciones y decisiones de arquitectura para asegura
 ```
 src/domain/{entity}/
 ├── {entity}.module.ts
-├── {entity}.service.ts
-├── {entity}.repository.ts
-└── controller/
-    ├── {entity}.controller.ts
-    └── request/
-        └── create-{entity}.request.ts
+├── controller/
+│   ├── {entity}.controller.ts
+│   └── {entity}.interface.ts
+├── repository/
+│   ├── {entity}.repository.interface.ts
+│   └── {entity}.repository.impl.ts
+└── service/
+    └── {entity}.service.ts
 ```
 
-**Por qué:** Mantiene todo relacionado a un dominio junto, pero separado de infraestructura.
+**Por qué:** Separa claramente las responsabilidades de controller, repository y service. La interfaz de negocio vive junto al controller ya que define el contrato de la API.
 
-### Interfaces de Negocio Separadas
+### Interfaces de Negocio
 ```
-src/interfaces/
-└── {entity}.class.ts
+src/domain/{entity}/controller/
+└── {entity}.interface.ts
 ```
 
-**Por qué:** Las interfaces de negocio no pertenecen a ningún dominio específico y pueden ser compartidas.
+**Por qué:** Las interfaces de negocio están junto al controller ya que definen el contrato de la API del dominio.
 
 ### Estructura TypeORM (centralizada)
 Cuando se usa TypeORM, centralizar todo lo relacionado en `src/database/`:
@@ -190,9 +192,10 @@ Scripts en `package.json`:
 | Tipo | Ubicación | Ejemplo |
 |------|-----------|---------|
 | Entities (TypeORM) | `src/database/migrations/entities/` | `import { Instrument } from '../../database/migrations/entities/instrument.entity'` |
-| Request DTOs | `controller/request/` | `import { CreateInstrumentRequest } from './request/create-instrument.request'` |
-| Services | `../{service}` | `import { InstrumentsService } from '../instruments.service'` |
-| Repositories | `../{repository}` | `import { InstrumentsRepository } from '../instruments.repository'` |
+| Business interfaces | `src/domain/{entity}/controller/` | `import { IInstrument } from '../../instrument/controller/instrument.interface'` |
+| Request DTOs | `src/domain/{entity}/controller/request/` | `import { CreateInstrumentRequest } from './request/create-instrument.request'` |
+| Services | `../service/{service}` | `import { InstrumentGetService } from '../service/instrument-get.service'` |
+| Repositories | `../repository/{repository}` | `import { InstrumentRepository } from '../repository/instrument.repository.interface'` |
 
 ---
 

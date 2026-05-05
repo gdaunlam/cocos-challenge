@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { InstrumentRepository } from './instrument.repository';
-import { Instrument, InstrumentType } from '../../database/migrations/entities/instrument.entity';
+import { InstrumentRepositoryImpl } from '../repository/instrument.repository.impl';
+import { Instrument, InstrumentType } from '../../../database/migrations/entities/instrument.entity';
 
 @Injectable()
 export class InstrumentGetService {
-  constructor(private readonly repository: InstrumentRepository) {}
+  constructor(private readonly repository: InstrumentRepositoryImpl) {}
 
   async findAll(): Promise<Instrument[]> {
     return this.repository.findAll();

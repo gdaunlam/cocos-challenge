@@ -1,14 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Order } from '../../database/migrations/entities/order.entity';
-import { OrderRepository } from './order.repository';
+import { Order } from '../../../database/migrations/entities/order.entity';
 
 @Injectable()
-export class OrderRepositoryImpl extends OrderRepository {
-  constructor(@InjectRepository(Order) private readonly repository: Repository<Order>) {
-    super();
-  }
+export class OrderRepositoryImpl {
+  constructor(@InjectRepository(Order) private readonly repository: Repository<Order>) {}
 
   async findByUserId(userId: number): Promise<Order[]> {
     return this.repository.find({ where: { userId } });

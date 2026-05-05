@@ -142,8 +142,10 @@ cat docs/STANDARDS.md
 | Rule | Standard |
 |------|----------|
 | Module structure | `src/domain/{entity}/{entity}.module.ts` |
-| Request DTOs | `src/domain/{entity}/controller/request/` |
-| Business interfaces | `src/interfaces/{entity}.class.ts` |
+| Controller | `src/domain/{entity}/controller/` |
+| Business interfaces | `src/domain/{entity}/controller/{entity}.interface.ts` |
+| Repository | `src/domain/{entity}/repository/` |
+| Service | `src/domain/{entity}/service/` |
 | Middleware registration | Always in `app.module.ts`, NOT in child modules |
 | `next()` in middleware | Must be inside `runWithTraceId()` callback |
 | Swagger docs | Use `@ApiProperty()` on DTOs and entities |
@@ -175,10 +177,10 @@ Before committing, verify:
 
 ## CRITICAL: Read SOLUTION.md Before Starting Work
 
-**You MUST read `docs/solution/SOLUTION.md` before taking ANY action.**
+**You MUST read `docs/SOLUTION/SOLUTION.md` before taking ANY action.**
 
 ```bash
-cat docs/solution/SOLUTION.md
+cat docs/SOLUTION/SOLUTION.md
 ```
 
 **Why this is MANDATORY:**
@@ -219,7 +221,7 @@ Entities go in `src/domain/shared/entities/`:
 
 ### Update SOLUTION.md After Work
 
-After completing ANY significant work, update `docs/solution/SOLUTION.md`:
+After completing ANY significant work, update `docs/SOLUTION/SOLUTION.md`:
 1. Add a new section describing the problem and solution
 2. Include code snippets if relevant
 3. Document design decisions and patterns used

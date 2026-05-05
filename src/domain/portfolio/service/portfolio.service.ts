@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { PortfolioRepository } from './portfolio.repository';
-import { PortfolioStatusBuilder } from '../shared/portfolio-status-builder';
-import { MarketPricesResolver } from '../shared/market-prices-resolver';
-import { cached } from '../shared/cache';
-import { InstrumentStatusMap } from '../shared/instrument-status';
-import { Position, PortfolioBody } from './portfolio.interface';
-import { InstrumentRepository } from '../instrument/instrument.repository';
-import { MarketDataRepository } from '../marketdata/marketdata.repository';
+import { PortfolioRepositoryImpl } from '../repository/portfolio.repository.impl';
+import { PortfolioStatusBuilder } from '../../shared/portfolio-status-builder';
+import { MarketPricesResolver } from '../../shared/market-prices-resolver';
+import { cached } from '../../shared/cache';
+import { InstrumentStatusMap } from '../../shared/instrument-status';
+import { Position, PortfolioBody } from '../controller/portfolio.interface';
+import { InstrumentRepositoryImpl } from '../../instrument/repository/instrument.repository.impl';
+import { MarketDataRepositoryImpl } from '../../marketdata/repository/marketdata.repository.impl';
 
 @Injectable()
 export class PortfolioService {
   constructor(
-    private readonly portfolioRepository: PortfolioRepository,
-    private readonly instrumentRepository: InstrumentRepository,
-    private readonly marketDataRepository: MarketDataRepository,
+    private readonly portfolioRepository: PortfolioRepositoryImpl,
+    private readonly instrumentRepository: InstrumentRepositoryImpl,
+    private readonly marketDataRepository: MarketDataRepositoryImpl,
   ) {}
 
   @cached('portfolio', function() { return `portfolio:${this.userId}`; })

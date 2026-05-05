@@ -1,43 +1,42 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const data = require('../../../data/data.json');
+const data = require('../../../../data/data.json');
 import { OrderService } from './order.service';
-import { OrderRepository } from './order.repository';
-import { InstrumentRepository } from '../instrument/instrument.repository';
-import { MarketDataRepository } from '../marketdata/marketdata.repository';
-import { cacheService } from '../shared/cache';
-import { Order, Side } from '../../database/migrations/entities/order.entity';
-import { MarketData } from '../../database/migrations/entities/marketdata.entity';
-import { Instrument } from '../../database/migrations/entities/instrument.entity';
+import { OrderRepositoryImpl } from '../repository/order.repository.impl';
+import { InstrumentRepositoryImpl } from '../../instrument/repository/instrument.repository.impl';
+import { MarketDataRepositoryImpl } from '../../marketdata/repository/marketdata.repository.impl';
+import { cacheService } from '../../shared/cache';
+import { Order, Side } from '../../../database/migrations/entities/order.entity';
+import { MarketData } from '../../../database/migrations/entities/marketdata.entity';
+import { Instrument } from '../../../database/migrations/entities/instrument.entity';
 
 const orders = data.orders as Order[];
 const marketData = data.marketdata as MarketData[];
 const instruments = data.instruments as Instrument[];
 
-const createMockOrderRepository = (overrides?: Partial<OrderRepository>): OrderRepository => ({
+const createMockOrderRepository = (overrides?: Partial<OrderRepositoryImpl>): OrderRepositoryImpl => ({
   findByUserId: jest.fn().mockImplementation((userId: number) =>
     Promise.resolve(orders.filter(o => o.userId === userId))
   ),
   findAll: jest.fn().mockResolvedValue(orders),
   save: jest.fn().mockImplementation((order: Order) => Promise.resolve({ ...order, id: 100 })),
   ...overrides,
-});
+} as unknown as OrderRepositoryImpl);
 
-const createMockInstrumentRepository = (): InstrumentRepository => ({
+const createMockInstrumentRepository = (): InstrumentRepositoryImpl => ({
   findAll: jest.fn().mockResolvedValue(instruments),
   findByType: jest.fn(),
   findById: jest.fn(),
   findWithSimilarity: jest.fn().mockResolvedValue([]),
-});
+} as unknown as InstrumentRepositoryImpl);
 
-const createMockMarketDataRepository = (): MarketDataRepository => ({
+const createMockMarketDataRepository = (): MarketDataRepositoryImpl => ({
   findAll: jest.fn().mockResolvedValue(marketData),
   findByInstrumentId: jest.fn(),
-});
+} as unknown as MarketDataRepositoryImpl);
 
 describe('OrderService', () => {
-  let mockOrderRepository: OrderRepository;
-  let mockInstrumentRepository: InstrumentRepository;
-  let mockMarketDataRepository: MarketDataRepository;
+  let mockOrderRepository: OrderRepositoryImpl;
+  let mockInstrumentRepository: InstrumentRepositoryImpl;
+  let mockMarketDataRepository: MarketDataRepositoryImpl;
 
   beforeEach(() => {
     cacheService.clear();

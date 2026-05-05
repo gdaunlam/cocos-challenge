@@ -1,12 +1,13 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const data = require('../../../data/data.json');
+const data = require('../../../../data/data.json');
 import { InstrumentSearchService } from './instrument-search.service';
-import { InstrumentRepository } from './instrument.repository';
-import { Instrument, InstrumentType } from '../../database/migrations/entities/instrument.entity';
+import { InstrumentRepositoryImpl } from '../repository/instrument.repository.impl';
+import { Instrument, InstrumentType } from '../../../database/migrations/entities/instrument.entity';
 
 const instruments = data.instruments as Instrument[];
 
-const createMockRepository = (overrides?: Partial<InstrumentRepository>): InstrumentRepository => ({
+type SearchResult = { instrument: Instrument; score: number };
+
+const createMockRepository = (overrides?: Partial<InstrumentRepositoryImpl>): InstrumentRepositoryImpl => ({
   findAll: jest.fn().mockResolvedValue(instruments),
   findByType: jest.fn().mockResolvedValue(instruments.filter(i => i.type === 'ACCIONES')),
   findById: jest.fn().mockResolvedValue(null),
@@ -28,17 +29,17 @@ const createMockRepository = (overrides?: Partial<InstrumentRepository>): Instru
         }
         return { instrument: i, score };
       })
-      .filter(r => r.score > 0)
-      .sort((a, b) => b.score - a.score)
+      .filter((r: SearchResult) => r.score > 0)
+      .sort((a: SearchResult, b: SearchResult) => b.score - a.score)
       .slice(offset, offset + limit);
     return Promise.resolve(scored);
   }),
   ...overrides,
-});
+} as unknown as InstrumentRepositoryImpl);
 
 describe('InstrumentSearchService', () => {
   let service: InstrumentSearchService;
-  let mockRepository: InstrumentRepository;
+  let mockRepository: InstrumentRepositoryImpl;
 
   beforeEach(() => {
     mockRepository = createMockRepository();

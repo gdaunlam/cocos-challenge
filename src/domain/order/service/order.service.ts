@@ -1,19 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { OrderRepository } from './order.repository';
-import { MarketPricesResolver } from '../shared/market-prices-resolver';
-import { PortfolioStatusBuilder } from '../shared/portfolio-status-builder';
-import { cacheService } from '../shared/cache';
-import { Order } from '../../database/migrations/entities/order.entity';
-import { CreateOrderInput, CreateOrderResult } from './order.interface';
-import { InstrumentRepository } from '../instrument/instrument.repository';
-import { MarketDataRepository } from '../marketdata/marketdata.repository';
+import { OrderRepositoryImpl } from '../repository/order.repository.impl';
+import { MarketPricesResolver } from '../../shared/market-prices-resolver';
+import { PortfolioStatusBuilder } from '../../shared/portfolio-status-builder';
+import { cacheService } from '../../shared/cache';
+import { Order } from '../../../database/migrations/entities/order.entity';
+import { CreateOrderInput, CreateOrderResult } from '../controller/order.interface';
+
+import { MarketDataRepositoryImpl } from '../../marketdata/repository/marketdata.repository.impl';
+import { InstrumentRepositoryImpl } from '../../instrument/repository/instrument.repository.impl';
 
 @Injectable()
 export class OrderService {
   constructor(
-    private readonly orderRepository: OrderRepository,
-    private readonly instrumentRepository: InstrumentRepository,
-    private readonly marketDataRepository: MarketDataRepository,
+    private readonly orderRepository: OrderRepositoryImpl,
+    private readonly instrumentRepository: InstrumentRepositoryImpl,
+    private readonly marketDataRepository: MarketDataRepositoryImpl,
   ) {}
 
   async createOrder(input: CreateOrderInput): Promise<CreateOrderResult> {

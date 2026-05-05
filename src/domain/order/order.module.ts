@@ -3,10 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Order } from '../../database/migrations/entities/order.entity';
 import { MarketData } from '../../database/migrations/entities/marketdata.entity';
 import { Instrument } from '../../database/migrations/entities/instrument.entity';
-import { OrderRepository } from './order.repository';
-import { OrderRepositoryImpl } from './order.repository.impl';
-import { OrderService } from './order.service';
-import { OrderController } from './order.controller';
+import { OrderRepositoryImpl } from './repository/order.repository.impl';
+import { OrderService } from './service/order.service';
+import { OrderController } from './controller/order.controller';
 import { InstrumentModule } from '../instrument/instrument.module';
 import { MarketDataModule } from '../marketdata/marketdata.module';
 
@@ -18,7 +17,7 @@ import { MarketDataModule } from '../marketdata/marketdata.module';
   ],
   controllers: [OrderController],
   providers: [
-    { provide: OrderRepository, useClass: OrderRepositoryImpl },
+    OrderRepositoryImpl,
     OrderService,
   ],
   exports: [OrderService],

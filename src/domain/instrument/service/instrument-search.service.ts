@@ -1,15 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { InstrumentRepository } from './instrument.repository';
-import { cached } from '../shared/cache';
-import {
-  SearchInstrumentsInput,
-  SearchInstrumentsOutput,
-  SearchBy,
-} from './instrument-search.interface';
+import { InstrumentRepositoryImpl } from '../repository/instrument.repository.impl';
+import { cached } from '../../shared/cache';
+import { SearchInstrumentsInput, SearchInstrumentsOutput } from '../controller/instrument-search.interface';
+
+type SearchBy = 'ticker' | 'name' | 'both';
 
 @Injectable()
 export class InstrumentSearchService {
-  constructor(private readonly repository: InstrumentRepository) {}
+  constructor(private readonly repository: InstrumentRepositoryImpl) {}
 
   @cached('search', (input: SearchInstrumentsInput) =>
     `search:${input.query}:${input.type ?? 'all'}:${input.searchBy ?? 'both'}:${input.page}:${input.limit}`

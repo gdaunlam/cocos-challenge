@@ -3,10 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Order } from '../../database/migrations/entities/order.entity';
 import { MarketData } from '../../database/migrations/entities/marketdata.entity';
 import { Instrument } from '../../database/migrations/entities/instrument.entity';
-import { PortfolioRepository } from './portfolio.repository';
-import { PortfolioRepositoryImpl } from './portfolio.repository.impl';
-import { PortfolioService } from './portfolio.service';
-import { PortfolioController } from './portfolio.controller';
+import { PortfolioRepositoryImpl } from './repository/portfolio.repository.impl';
+import { PortfolioService } from './service/portfolio.service';
+import { PortfolioController } from './controller/portfolio.controller';
 import { InstrumentModule } from '../instrument/instrument.module';
 import { MarketDataModule } from '../marketdata/marketdata.module';
 
@@ -18,7 +17,7 @@ import { MarketDataModule } from '../marketdata/marketdata.module';
   ],
   controllers: [PortfolioController],
   providers: [
-    { provide: PortfolioRepository, useClass: PortfolioRepositoryImpl },
+    PortfolioRepositoryImpl,
     PortfolioService,
   ],
   exports: [PortfolioService],
