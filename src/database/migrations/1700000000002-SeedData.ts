@@ -1,6 +1,5 @@
+const data: SeedData = require('../../../data/data.json');
 import { MigrationInterface, QueryRunner } from 'typeorm';
-import * as fs from 'fs';
-import * as path from 'path';
 import * as dotenv from 'dotenv';
 
 dotenv.config({ path: `.envs/.${process.env.NODE_ENV || 'development'}` });
@@ -35,10 +34,6 @@ export class SeedData1700000000002 implements MigrationInterface {
   name = 'SeedData1700000000002';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    const dataPath = path.join(__dirname, '..', '..', '..', '..', 'data', 'data.json');
-    const rawData = fs.readFileSync(dataPath, 'utf-8');
-    const data: SeedData = JSON.parse(rawData);
-
     for (const user of data.users) {
       await queryRunner.query(
         `INSERT INTO "users" ("id", "email", "accountNumber") VALUES ($1, $2, $3)`,

@@ -1,0 +1,97 @@
+{
+  "info": {
+    "name": "Nest Alive API",
+    "description": "API collection for Nest Alive trading platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Create Order",
+      "request": {
+        "name": "Create Order",
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"instrumentId\": 1,\n    \"userId\": 1,\n    \"side\": \"BUY\",\n    \"quantity\": 100,\n    \"price\": 150.00,\n    \"type\": \"LIMIT\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/orders",
+          "host": ["{{baseUrl}}"],
+          "path": ["orders"]
+        },
+        "description": "Create a new order (BUY/SELL/LIMIT/MARKET)"
+      },
+      "response": []
+    },
+    {
+      "name": "Search Instruments",
+      "request": {
+        "name": "Search Instruments",
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/instruments/search?q=apple&type=ACCIONES&searchBy=both&page=1&limit=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["instruments", "search"],
+          "query": [
+            {
+              "key": "q",
+              "value": "apple",
+              "description": "Search query (min 3 characters)"
+            },
+            {
+              "key": "type",
+              "value": "ACCIONES",
+              "description": "Filter by type (ACCIONES or MONEDA)"
+            },
+            {
+              "key": "searchBy",
+              "value": "both",
+              "description": "Search by ticker, name, or both"
+            },
+            {
+              "key": "page",
+              "value": "1",
+              "description": "Page number"
+            },
+            {
+              "key": "limit",
+              "value": "10",
+              "description": "Results per page"
+            }
+          ]
+        },
+        "description": "Search instruments by ticker or name"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Portfolio",
+      "request": {
+        "name": "Get Portfolio",
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/portfolio/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["portfolio", "1"]
+        },
+        "description": "Get user portfolio with positions and cash"
+      },
+      "response": []
+    }
+  ]
+}

@@ -17,15 +17,13 @@ class CacheService {
 
   get<T>(key: string): T | undefined {
     const entry = this.cache.get(key) as CacheEntry<T> | undefined;
-    if (entry) {
-      const idx = this.order.indexOf(key);
-      if (idx > -1) {
-        this.order.splice(idx, 1);
-      }
-      this.order.push(key);
-      return entry.value;
+    if (!entry) return undefined;
+    const idx = this.order.indexOf(key);
+    if (idx > -1) {
+      this.order.splice(idx, 1);
     }
-    return undefined;
+    this.order.push(key);
+    return entry.value;
   }
 
   set<T>(key: string, value: T): void {

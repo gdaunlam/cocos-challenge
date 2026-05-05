@@ -11,6 +11,7 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_DATABASE || 'nest_alive',
-  migrations: [join(__dirname, 'dist', 'database', 'migrations', '*.js')],
+  migrations: [join(process.cwd(), 'src', 'database', 'migrations', '*.ts')],
   migrationsTableName: 'migrations',
+  synchronize: false,
 });

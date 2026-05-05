@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Order } from '../../../database/migrations/entities/order.entity';
 
+export type SaveOrderDto = Omit<Order, 'id'>;
+
 @Injectable()
 export class OrderRepositoryImpl {
   constructor(@InjectRepository(Order) private readonly repository: Repository<Order>) {}
@@ -15,7 +17,7 @@ export class OrderRepositoryImpl {
     return this.repository.find();
   }
 
-  async save(order: Order): Promise<Order> {
+  async save(order: SaveOrderDto): Promise<Order> {
     return this.repository.save(order);
   }
 }

@@ -5,7 +5,7 @@
 **You MUST read the CHANGELOG directory before taking ANY action.** This is not optional.
 
 ```bash
-ls -la CHANGELOG/ && for f in CHANGELOG/*.md; do echo "=== $(basename $f) ===" && head -10 "$f"; done
+ls -la docs/CHANGELOG/ && for f in docs/CHANGELOG/*.md; do echo "=== $(basename $f) ===" && head -10 "$f"; done
 ```
 
 **Why this is MANDATORY:**
@@ -28,14 +28,14 @@ After completing ANY work that modifies files, creates new functionality, or cha
 
 ### If a changelog entry already exists for this session:
 
-Update the existing file at `CHANGELOG/{session_id}.md` by:
+Update the existing file at `docs/CHANGELOG/{session_id}.md` by:
 1. Adding new changes to the "Key Changes" table
 2. Updating the "Summary" if the scope changed significantly
 3. Adding a "Last Updated" timestamp
 
 ### If NO changelog entry exists for this session:
 
-Create a new file at `CHANGELOG/{session_id}.md` with:
+Create a new file at `docs/CHANGELOG/{session_id}.md` with:
 
 ```markdown
 ---
@@ -112,7 +112,7 @@ Before implementing ANY change, you MUST check for potential conflicts with exis
 ### Procedure
 1. **List changelog files** (most recent first):
    ```bash
-   ls -la CHANGELOG/ && for f in CHANGELOG/*.md; do echo "=== $(basename $f) ===" && head -20 "$f"; done
+   ls -la docs/CHANGELOG/ && for f in docs/CHANGELOG/*.md; do echo "=== $(basename $f) ===" && head -20 "$f"; done
    ```
 
 2. **Read changelogs in reverse chronological order** (newest first) to understand the current state of the project

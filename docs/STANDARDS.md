@@ -11,14 +11,18 @@ Este documento define las convenciones y decisiones de arquitectura para asegura
 src/domain/{entity}/
 ├── {entity}.module.ts
 ├── controller/
-│   ├── {entity}.controller.ts
-│   └── {entity}.interface.ts
+│   ├── {entity}.controller.ts          # Controller principal
+│   ├── {entity}.interface.ts           # Interfaz de negocio (contrato API)
+│   ├── {entity}.query.dto.ts           # Query parameters DTO (opcional)
+│   └── {entity}.{feature}.dto.ts       # DTOs específicos (opcional)
 ├── repository/
 │   ├── {entity}.repository.interface.ts
 │   └── {entity}.repository.impl.ts
 └── service/
     └── {entity}.service.ts
 ```
+
+**Naming:** Usar nombres descriptivos cuando sea necesario. Ej: `instrument-search.controller.ts` en vez de `instrument.controller.ts` si hay múltiples controllers.
 
 **Por qué:** Separa claramente las responsabilidades de controller, repository y service. La interfaz de negocio vive junto al controller ya que define el contrato de la API.
 
@@ -29,6 +33,18 @@ src/domain/{entity}/controller/
 ```
 
 **Por qué:** Las interfaces de negocio están junto al controller ya que definen el contrato de la API del dominio.
+
+### DTOs (Data Transfer Objects)
+Los DTOs van en `controller/` junto al controller que los usa. Naming descriptivo:
+```
+src/domain/{entity}/controller/
+├── {entity}.controller.ts
+├── {entity}.interface.ts
+├── {entity}.query.dto.ts           # Query parameters
+└── {entity}.create.dto.ts          # Request bodies
+```
+
+**Usar `class-validator` decorators para validación y `@ApiProperty()` para documentación Swagger.**
 
 ### Estructura TypeORM (centralizada)
 Cuando se usa TypeORM, centralizar todo lo relacionado en `src/database/`:
@@ -48,30 +64,22 @@ src/database/
 
 ## 2. DTOs y Validación
 
-### Request DTOs junto al Controller
-- Located at: `controller/request/`
-- Usar `class-validator` decorators para validación
-- Usar `@ApiProperty()` para documentación Swagger
+Los DTOs van en `controller/` junto al controller que los usa. Naming descriptivo.
 
-**Ejemplo:**
+**Usar `class-validator` decorators para validación y `@ApiProperty()` para documentación Swagger.**
+
 ```typescript
-// controller/request/create-instrument.request.ts
-export class CreateInstrumentRequest {
-  @ApiProperty()
-  @IsNotEmpty()
+// src/domain/instrument/controller/instrument-search.query.dto.ts
+export class InstrumentSearchQueryDto {
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsString()
-  name!: string;
-  // ...
-}
-```
+  query?: string;
 
-### Response/Entity Interfaces con Swagger
-```typescript
-// src/interfaces/instrument.class.ts
-export class Instrument {
-  @ApiProperty({ example: 'Bond A' })
-  name!: string;
-  // ...
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsEnum(InstrumentType)
+  type?: InstrumentType;
 }
 ```
 
@@ -173,7 +181,7 @@ Scripts en `package.json`:
 
 ### Archivos de Test
 - **Unit tests**: `*.spec.ts` junto al archivo que prueban
-- **E2E tests**: `*.e2e-spec.ts` en `src/`
+- **Integration tests**: En `src/tracer/`, `src/logger/`, etc. (no hay E2E tests activos)
 
 ### Cobertura mínima
 - Servicios con lógica de negocio
@@ -275,7 +283,7 @@ Antes de modificar el Service, consultar si el cambio es necesario o si solo se 
 
 Al trabajar en este proyecto:
 1. **Lee `STANDARDS.md` antes de hacer cambios**
-2. **Revisa los changelogs en `CHANGELOG/`** para entender decisiones previas
+2. **Revisa los changelogs en `docs/CHANGELOG/`** para entender decisiones previas
 3. **Si algo no está cubierto, pregúntame antes de asumir**
 4. **Si un cambio implica lógica de negocio o amplía el área de afectación, pregúntame antes de implementarlo**
 

@@ -1,4 +1,4 @@
-import { Side } from '../../../database/migrations/entities/order.entity';
+import { Order, Side } from '../../../database/migrations/entities/order.entity';
 
 export interface CreateOrderInput {
   instrumentId: number;
@@ -10,15 +10,5 @@ export interface CreateOrderInput {
 }
 
 export interface CreateOrderResult {
-  order: {
-    id: number;
-    instrumentId: number;
-    userId: number;
-    side: Side;
-    size: number;
-    price: number;
-    type: 'MARKET' | 'LIMIT';
-    status: 'FILLED' | 'NEW' | 'CANCELLED' | 'REJECTED';
-    datetime: string;
-  };
+  order: Order;
 }

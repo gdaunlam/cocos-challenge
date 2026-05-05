@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { OrderRepositoryImpl } from '../repository/order.repository.impl';
+import { OrderRepositoryImpl, SaveOrderDto } from '../repository/order.repository.impl';
 import { MarketPricesResolver } from '../../shared/market-prices-resolver';
 import { PortfolioStatusBuilder } from '../../shared/portfolio-status-builder';
 import { cacheService } from '../../shared/cache';
@@ -81,8 +81,7 @@ export class OrderService {
       status = isMarket ? 'FILLED' : 'NEW';
     }
 
-    const newOrder: Order = {
-      id: 0,
+    const newOrder: SaveOrderDto = {
       instrumentId: input.instrumentId,
       userId: input.userId,
       side: input.side,

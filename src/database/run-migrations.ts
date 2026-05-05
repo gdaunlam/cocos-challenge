@@ -13,8 +13,8 @@ export async function runMigrations(): Promise<void> {
   }
 
   return new Promise((resolve, reject) => {
-    const typeormPath = join(__dirname, '..', '..', 'node_modules', 'typeorm', 'cli.js');
-    const configPath = join(__dirname, '..', '..', 'typeorm-cli.config.ts');
+    const typeormPath = join(process.cwd(), 'node_modules', 'typeorm', 'cli.js');
+    const configPath = join(process.cwd(), 'typeorm-cli.config.ts');
 
     const child = spawn('npx', ['ts-node', '-r', 'tsconfig-paths/register', typeormPath, 'migration:run', '-d', configPath], {
       stdio: 'inherit',
