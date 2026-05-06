@@ -16,8 +16,7 @@ src/domain/{entity}/
 │   ├── {entity}.query.dto.ts           # Query parameters DTO (opcional)
 │   └── {entity}.{feature}.dto.ts       # DTOs específicos (opcional)
 ├── repository/
-│   ├── {entity}.repository.interface.ts
-│   └── {entity}.repository.impl.ts
+│   └── {entity}.repository.impl.ts     # Repository implementation
 └── service/
     └── {entity}.service.ts
 ```
@@ -201,9 +200,9 @@ Scripts en `package.json`:
 |------|-----------|---------|
 | Entities (TypeORM) | `src/database/entities/` | `import { Instrument } from '../../database/entities/instrument.entity'` |
 | Business interfaces | `src/domain/{entity}/controller/` | `import { IInstrument } from '../../instrument/controller/instrument.interface'` |
-| Request DTOs | `src/domain/{entity}/controller/request/` | `import { CreateInstrumentRequest } from './request/create-instrument.request'` |
+| Request DTOs | `src/domain/{entity}/controller/` | `import { CreateOrderInput } from './order.interface'` |
 | Services | `../service/{service}` |
-| Repositories | `../repository/{repository}` | `import { InstrumentRepository } from '../repository/instrument.repository.interface'` |
+| Repositories | `../repository/{repository}` | `import { InstrumentRepositoryImpl } from '../repository/instrument.repository.impl'` |
 
 ---
 

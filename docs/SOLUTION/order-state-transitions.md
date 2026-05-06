@@ -78,8 +78,8 @@ When a BUY or SELL order FILLS:
 | BUY | REJECTED | - | - | - | - | - | - | - | - |
 | SELL | NEW | - | - | `credit -= size*price` | `limit -= size*price` | - | - | - | - |
 | SELL | FILLED | `debit -= size*price` | `holdings -= size` | `credit -= size*price` | `limit -= size` | `debit += size*price` | `holdings += size*price` | `credit += size*price` | `limit += size*price` |
-| SELL | CANCELLED | - | - | `credit += size*price` | `limit += size` | - | - | - | - |
-| SELL | REJECTED | - | - | `credit += size*price` | `limit += size` | - | - | - | - |
+| SELL | CANCELLED | - | - | - | - | - | - | - | - |
+| SELL | REJECTED | - | - | - | - | - | - | - | - |
 | CASH_IN | FILLED | `debit += size*price` | `holdings += size*price` | `credit += size*price` | `limit += size*price` | - | - | - | - |
 | CASH_OUT | FILLED | `debit -= size*price` | `holdings -= size*price` | `credit -= size*price` | `limit -= size*price` | - | - | - | - |
 

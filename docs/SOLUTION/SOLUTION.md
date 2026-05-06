@@ -341,8 +341,8 @@ src/
   "compilerOptions": {
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "target": "ES2022",
-    "module": "NodeNext",
+    "target": "ES2017",
+    "module": "commonjs",
     "moduleResolution": "NodeNext"
   }
 }

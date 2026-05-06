@@ -53,10 +53,9 @@ export class PortfolioService {
     marketData: any[],
     instruments: any[]
   ): Position[] {
-    const positions: Position[] = [];
+const positions: Position[] = [];
     const latestPrices = MarketPricesResolver.getLatestPricesMap(orders, marketData);
 
-    console.log(instrumentMap)
     for (const [instrumentId, status] of instrumentMap) {
       if (status.holdings === 0) continue;
       const instrument = instruments.find((i: any) => i.id === instrumentId);
