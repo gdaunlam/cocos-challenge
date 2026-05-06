@@ -7,11 +7,11 @@ import { SearchBy, SearchInstrumentsQueryDto } from '../controller/instrument-se
 
 @Injectable()
 export class InstrumentSearchService {
-  constructor(private readonly repository: InstrumentRepositoryImpl) {}
+  constructor(private readonly repository: InstrumentRepositoryImpl) { }
 
-  @cached('search', (input: SearchInstrumentsQueryDto) =>
-    `search:${input.q}:${input.type ?? 'all'}:${input.searchBy ?? SearchBy.BOTH}:${input.page}:${input.limit}`
-  )
+  @cached('search', function (this: InstrumentSearchService, input: SearchInstrumentsQueryDto) {
+    return `search:${input.q}:${input.type ?? 'all'}:${input.searchBy ?? SearchBy.BOTH}:${input.page}:${input.limit}`
+  })
   async search(input: SearchInstrumentsQueryDto): Promise<SearchInstrumentsOutput> {
     const searchBy: SearchBy = input.searchBy ?? SearchBy.BOTH;
     const limit = input.limit;

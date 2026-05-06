@@ -2,7 +2,7 @@ import { cacheService } from './cache-service';
 
 export function cached(
   cacheKey: string,
-  identityFn: (this: any, ...args: any[]) => string
+  identityFn: (...args: any[]) => string
 ) {
   return function (
     target: object,

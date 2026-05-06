@@ -293,15 +293,15 @@ function cached(
 
 **Search Instruments:**
 ```typescript
-@cached('search', (input: SearchInstrumentsInput) =>
-  `search:${input.query}:${input.type ?? 'all'}:${input.searchBy ?? 'both'}:${input.page}:${input.limit}`
-)
+@cached('search', function (this: InstrumentSearchService, input: SearchInstrumentsQueryDto) {
+  return `search:${input.q}:${input.type ?? 'all'}:${input.searchBy ?? SearchBy.BOTH}:${input.page}:${input.limit}`
+})
 async search(input: SearchInstrumentsInput): Promise<SearchInstrumentsOutput> { ... }
 ```
 
 **Calculate Portfolio:**
 ```typescript
-@cached('portfolio', function() { return `portfolio:${this.userId}`; })
+@cached('portfolio', function (this: PortfolioService, userId: number) { return `portfolio:${userId}`; })
 calculatePortfolio(): PortfolioBody { ... }
 ```
 

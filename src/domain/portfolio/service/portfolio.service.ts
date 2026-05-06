@@ -15,9 +15,9 @@ export class PortfolioService {
     private readonly portfolioRepository: PortfolioRepositoryImpl,
     private readonly instrumentRepository: InstrumentRepositoryImpl,
     private readonly marketDataRepository: MarketDataRepositoryImpl,
-  ) {}
+  ) { }
 
-  @cached('portfolio', function() { return `portfolio:${this.userId}`; })
+  @cached('portfolio', function (this: PortfolioService, userId: number) { return `portfolio:${userId}`; })
   async calculatePortfolio(userId: number): Promise<PortfolioBody> {
     const [orders, instruments, marketData] = await Promise.all([
       this.portfolioRepository.findOrdersByUserId(userId),
@@ -34,12 +34,12 @@ export class PortfolioService {
     const instrumentMap = processor.process(orders);
 
     const arsStatus = instrumentMap.get(arsInstrument.id);
-    if(!arsStatus) {
+    if (!arsStatus) {
       throw new Error('ARS instrument status not found');
     }
     const positions = this.calculatePositions(instrumentMap, orders, marketData, instruments);
     const positionsValue = positions.reduce((sum, p) => sum + p.marketValue, 0);
-    
+
     return {
       totalValue: arsStatus.debit + positionsValue,
       availableCash: arsStatus.credit,
@@ -53,7 +53,7 @@ export class PortfolioService {
     marketData: any[],
     instruments: any[]
   ): Position[] {
-const positions: Position[] = [];
+    const positions: Position[] = [];
     const latestPrices = MarketPricesResolver.getLatestPricesMap(orders, marketData);
 
     for (const [instrumentId, status] of instrumentMap) {
