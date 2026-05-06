@@ -23,14 +23,15 @@ export class PortfolioStatusBuilder {
   private buildContext(order: Order): StrategyContext {
     let target: InstrumentStatus;
     let exchanged: InstrumentStatus | null = null;
-
+    
     if (['CASH_IN', 'CASH_OUT'].includes(order.side)) {
       target = this.getOrCreate(this.arsInstrumentId);
+      return { target, exchanged };
     } else {
       target = this.getOrCreate(order.instrumentId);
       exchanged = this.getOrCreate(this.arsInstrumentId);
+      return { target, exchanged };
     }
-    return { target, exchanged };
   }
 
   process(orders: Order[]): InstrumentStatusMap {

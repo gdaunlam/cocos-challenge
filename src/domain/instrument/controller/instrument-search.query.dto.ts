@@ -1,12 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsEnum, IsOptional, IsNumber, Min } from 'class-validator';
+import { IsNotEmpty, IsString, IsEnum, IsOptional, IsNumber, Min, MinLength } from 'class-validator';
 import { Type } from 'class-transformer';
 import { InstrumentType } from '../../../database/entities/instrument.entity';
+
+export enum SearchBy {
+  TICKER = 'ticker',
+  NAME = 'name',
+  BOTH = 'both',
+}
 
 export class SearchInstrumentsQueryDto {
   @ApiProperty({ description: 'Search query (min 3 characters)', name: 'q' })
   @IsNotEmpty()
   @IsString()
+  @MinLength(3)
   q!: string;
 
   @ApiProperty({ required: false, enum: InstrumentType })
@@ -14,22 +21,22 @@ export class SearchInstrumentsQueryDto {
   @IsEnum(InstrumentType)
   type?: InstrumentType;
 
-  @ApiProperty({ required: false, enum: ['ticker', 'name', 'both'], default: 'both' })
+  @ApiProperty({ required: false, enum: SearchBy, default: SearchBy.BOTH })
   @IsOptional()
-  @IsString()
-  searchBy?: 'ticker' | 'name' | 'both';
+  @IsEnum(SearchBy)
+  searchBy?: SearchBy;
 
   @ApiProperty({ required: false, default: 1 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  page?: number;
+  page: number = 0;
 
   @ApiProperty({ required: false, default: 10 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  limit?: number;
+  limit: number = 10;
 }

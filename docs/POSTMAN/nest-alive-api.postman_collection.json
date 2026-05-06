@@ -20,7 +20,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"instrumentId\": 1,\n    \"userId\": 1,\n    \"side\": \"BUY\",\n    \"quantity\": 100,\n    \"price\": 150.00,\n    \"type\": \"LIMIT\"\n}",
+          "raw": "{\n    \"instrumentId\": 1,\n    \"userId\": 1,\n    \"side\": \"BUY\",\n    \"quantity\": 100,\n    \"price\": 150.00\n}",
           "options": {
             "raw": {
               "language": "json"

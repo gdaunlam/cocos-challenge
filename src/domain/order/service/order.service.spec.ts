@@ -261,36 +261,6 @@ describe('OrderService', () => {
         quantity: 10,
       })).rejects.toThrow('No market price available for instrument');
     });
-
-    it('should reject invalid instrumentId', async () => {
-      const service = new OrderService(
-        mockOrderRepository,
-        mockInstrumentRepository,
-        mockMarketDataRepository
-      );
-
-      await expect(service.createOrder({
-        instrumentId: 0,
-        userId: 1,
-        side: Side.BUY,
-        quantity: 10,
-      })).rejects.toThrow('instrumentId must be a positive number');
-    });
-
-    it('should reject invalid userId', async () => {
-      const service = new OrderService(
-        mockOrderRepository,
-        mockInstrumentRepository,
-        mockMarketDataRepository
-      );
-
-      await expect(service.createOrder({
-        instrumentId: 1,
-        userId: -1,
-        side: Side.BUY,
-        quantity: 10,
-      })).rejects.toThrow('userId must be a positive number');
-    });
   });
 
   describe('MARKET price', () => {

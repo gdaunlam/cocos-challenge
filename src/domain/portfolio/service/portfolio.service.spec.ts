@@ -51,7 +51,7 @@ describe('PortfolioService', () => {
     const result = await service.calculatePortfolio(1);
 
     expect(result.totalValue).toBe(900300);
-    expect(result.availableCash).toBe(753000);
+    expect(result.availableCash).toBe(627500);
     expect(result.positions.length).toBe(3);
 
     const irsa = result.positions.find(p => p.ticker === 'IRSA');

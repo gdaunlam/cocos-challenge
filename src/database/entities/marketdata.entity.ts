@@ -11,23 +11,23 @@ export class MarketData {
   @ApiProperty({ example: 1 })
   instrumentId!: number;
 
-  @Column('decimal')
+  @Column()
   @ApiProperty({ example: 150.25 })
   high!: number;
 
-  @Column('decimal')
+  @Column()
   @ApiProperty({ example: 148.5 })
   low!: number;
 
-  @Column('decimal')
+  @Column()
   @ApiProperty({ example: 149.0 })
   open!: number;
 
-  @Column('decimal')
+  @Column()
   @ApiProperty({ example: 150.25 })
   close!: number;
 
-  @Column('decimal')
+  @Column()
   @ApiProperty({ example: 147.8 })
   previousClose!: number;
 

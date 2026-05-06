@@ -81,11 +81,11 @@ class PortfolioService {
 
 ### Decisiones de Diseño
 
-1. **instrumentId = 66 es ARS (MONEDA)**: Se excluye del cálculo de posiciones
+1. **ARS se determina dinámicamente**: Se busca el instrumento con `InstrumentType.MONEDA` en runtime, no se usa un instrumentId hardcodeado. Esto permite flexibilidad si los IDs de instrumentos cambian.
 2. **Market data se ordena por fecha**: Se usa el más reciente (2023-07-14) para precios fallback
 3. **Precios de mercado**: Se priorizan órdenes FILLED (más reciente), fallback a marketdata.close
-3. **Órdenes FILLED únicamente**: Solo las órdenes ejecutadas cuentan para posiciones y cash real
-4. **Instrumentos sin marketdata**: Se skippean porque no tienen precio actual
+4. **Órdenes FILLED únicamente**: Solo las órdenes ejecutadas cuentan para posiciones y cash real
+5. **Instrumentos sin marketdata**: Se skippean porque no tienen precio actual
 
 ## Arquitectura de Entities
 

@@ -13,6 +13,7 @@ Cambio de rutas de controllers de plural a singular siguiendo convención REST. 
 | src/domain/order/controller/order.controller.ts | `@Controller('orders')` → `@Controller('order')` |
 | src/domain/instrument/controller/instrument-search.controller.ts | `@Controller('instruments')` → `@Controller('instrument')` |
 | docs/POSTMAN/nest-alive-api.postman_collection.json | `/orders` → `/order`, `/instruments/search` → `/instrument/search` |
+| docs/POSTMAN/nest-alive-api.postman_collection.json | Eliminado `type` del body (se infiere del `price`: sin price=MARKET, con price=LIMIT) |
 | src/tracer/trace.integration.spec.ts | 6 refs `/instruments*` → `/instrument*` |
 | src/logger/logger.middleware.spec.ts | 9 refs `/instruments*` → `/instrument*` |
 

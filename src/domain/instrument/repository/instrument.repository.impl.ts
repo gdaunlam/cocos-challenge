@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Instrument, InstrumentType } from '../../../database/entities/instrument.entity';
 
-type SearchResult = { instrument: Instrument; score: number };
+type SearchResult = { instrument: Instrument; score: number; total: number };
 type SearchBy = 'ticker' | 'name' | 'both';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class InstrumentRepositoryImpl {
 
   private readonly QUERIES = {
     ticker: `
-      SELECT i.*, similarity(i.ticker, $1) AS score
+      SELECT COUNT(*) OVER() AS total, i.*, similarity(i.ticker, $1) AS score
       FROM instruments i
       WHERE ($2::text IS NULL OR i.type = $2)
         AND (similarity(i.ticker, $1) > 0)
@@ -24,7 +24,7 @@ export class InstrumentRepositoryImpl {
       LIMIT $3 OFFSET $4
     `,
     name: `
-      SELECT i.*, similarity(i.name, $1) AS score
+      SELECT COUNT(*) OVER() AS total, i.*, similarity(i.name, $1) AS score
       FROM instruments i
       WHERE ($2::text IS NULL OR i.type = $2)
         AND (similarity(i.name, $1) > 0)
@@ -32,7 +32,7 @@ export class InstrumentRepositoryImpl {
       LIMIT $3 OFFSET $4
     `,
     both: `
-      SELECT i.*, GREATEST(similarity(i.ticker, $1) * 0.7, similarity(i.name, $1) * 0.3) AS score
+      SELECT COUNT(*) OVER() AS total, i.*, GREATEST(similarity(i.ticker, $1) * 0.7, similarity(i.name, $1) * 0.3) AS score
       FROM instruments i
       WHERE ($2::text IS NULL OR i.type = $2)
         AND (similarity(i.ticker, $1) > 0 OR similarity(i.name, $1) > 0)
@@ -61,6 +61,7 @@ export class InstrumentRepositoryImpl {
         type: row.type,
       } as Instrument,
       score: parseFloat(row.score),
+      total: parseInt(row.total, 10),
     }));
   }
 }

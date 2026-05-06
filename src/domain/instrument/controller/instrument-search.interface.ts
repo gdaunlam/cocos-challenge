@@ -1,15 +1,5 @@
 import { InstrumentType } from "../../../database/entities/instrument.entity";
 
-export type SearchBy = 'ticker' | 'name' | 'both';
-
-export interface SearchInstrumentsInput {
-  query: string;
-  type?: InstrumentType;
-  searchBy?: SearchBy;
-  page: number;
-  limit: number;
-}
-
 export interface SearchInstrumentsResult {
   id: number;
   ticker: string;

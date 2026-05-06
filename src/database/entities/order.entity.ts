@@ -32,11 +32,11 @@ export class Order {
   @ApiProperty({ example: 1 })
   userId!: number;
 
-  @Column('decimal')
+  @Column()
   @ApiProperty({ example: 10 })
   size!: number;
 
-  @Column('decimal')
+  @Column()
   @ApiProperty({ example: 100.5 })
   price!: number;
 

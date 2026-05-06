@@ -70,86 +70,18 @@ When a BUY or SELL order FILLS:
 
 ## State Transition Table
 
-| Side | Status | target debit | target holdings | target credit | target limit | exchanged debit | exchanged holdings |
-|------|--------|--------------|-----------------|---------------|--------------|-----------------|---------------------|
-| BUY | NEW | - | - | - | - | `credit -= size*price` | `limit -= size` |
-| BUY | FILLED | `debit += size*price` | `holdings += size` | `credit += size*price` | `limit += size` | `debit -= size*price` | `holdings -= size` |
-| BUY | CANCELLED | - | - | - | - | `credit += size*price` | `limit += size` |
-| BUY | REJECTED | - | - | - | - | `credit += size*price` | `limit += size` |
-| SELL | NEW | - | - | `credit -= size*price` | `limit -= size` | - | - |
-| SELL | FILLED | `debit -= size*price` | `holdings -= size` | - | `limit -= size` | `debit += size*price` | `holdings += size` |
-| SELL | CANCELLED | - | - | `credit += size*price` | `limit += size` | - | - |
-| SELL | REJECTED | - | - | `credit += size*price` | `limit += size` | - | - |
-| CASH_IN | FILLED | `debit += size` | `holdings += size` | `credit += size` | `limit += size` | - | - |
-| CASH_OUT | FILLED | `debit -= size` | `holdings -= size` | `credit -= size` | `limit -= size` | - | - |
-
----
-
-## Complete Example: Buy and Sell Cycle
-
-### Initial State
-```
-Portfolio:
-  INSTRUMENT_A: debit=0, holdings=0, credit=0, limit=0
-  INSTRUMENT_B: debit=10000, holdings=10000, credit=10000, limit=10000
-```
-
-### Step 1: BUY NEW
-Creates order: 10 @ price 100
-
-```
-Note: Only credit/limit changes. No actual exchange yet.
-  INSTRUMENT_A: credit -= 10*100 = 1000, limit -= 10
-  INSTRUMENT_B: credit -= 10*100 = 1000, limit -= 10
-
-Portfolio after BUY NEW:
-  INSTRUMENT_A: debit=0, holdings=0, credit=0, limit=0
-  INSTRUMENT_B: debit=10000, holdings=10000, credit=9000, limit=9990
-```
-
-### Step 2: BUY FILLED
-Order executes.
-
-```
-For BUY FILLED:
-  target (INSTRUMENT_A): debit += 1000, holdings += 10, credit += 1000, limit += 10
-  exchanged (INSTRUMENT_B): debit -= 1000, holdings -= 10
-
-Portfolio after BUY FILLED:
-  INSTRUMENT_A: debit=1000, holdings=10, credit=1000, limit=10
-  INSTRUMENT_B: debit=9000, holdings=9000, credit=9000, limit=9990
-```
-
-### Step 3: SELL NEW
-Creates SELL order: 5 @ price 120
-
-```
-For SELL NEW:
-  target (INSTRUMENT_A): credit -= 5*120 = 600, limit -= 5
-
-Portfolio after SELL NEW:
-  INSTRUMENT_A: debit=1000, holdings=10, credit=400, limit=5
-  INSTRUMENT_B: debit=9000, holdings=9000, credit=9000, limit=9990
-```
-
-### Step 4: SELL FILLED
-Order executes at 120.
-
-```
-For SELL FILLED:
-  target (INSTRUMENT_A): debit -= 5*120 = 600, holdings -= 5, limit -= 5
-  exchanged (INSTRUMENT_B): debit += 600, holdings += 6, credit += 600, limit += 6
-
-Portfolio after SELL FILLED:
-  INSTRUMENT_A: debit=400, holdings=5, credit=400, limit=0
-  INSTRUMENT_B: debit=9600, holdings=9600, credit=9600, limit=9990
-```
-
-### What happened?
-- Started with 0 of INSTRUMENT_A, 10000 of INSTRUMENT_B
-- Bought 10 @ 100 (cost 1000)
-- Sold 5 @ 120 (earned 600)
-- Final: 5 of INSTRUMENT_A, 9600 of INSTRUMENT_B
+| Side | Status | target_debit | target_holdings | target_credit | target_limit | exchanged_debit | exchanged_holdings | exchanged_credit | exchanged_limit |
+|------|--------|--------------|-----------------|---------------|--------------|-----------------|-------------------|------------------|-----------------|
+| BUY | NEW | - | - | - | - | - | - | `credit -= size*price` | `limit -= size*price` |
+| BUY | FILLED | `debit += size*price` | `holdings += size` | `credit += size*price` | `limit += size` | `debit -= size*price` | `holdings -= size*price` | `credit -= size*price` | `limit -= size*price` |
+| BUY | CANCELLED | - | - | - | - | - | - | - | - |
+| BUY | REJECTED | - | - | - | - | - | - | - | - |
+| SELL | NEW | - | - | `credit -= size*price` | `limit -= size*price` | - | - | - | - |
+| SELL | FILLED | `debit -= size*price` | `holdings -= size` | `credit -= size*price` | `limit -= size` | `debit += size*price` | `holdings += size*price` | `credit += size*price` | `limit += size*price` |
+| SELL | CANCELLED | - | - | `credit += size*price` | `limit += size` | - | - | - | - |
+| SELL | REJECTED | - | - | `credit += size*price` | `limit += size` | - | - | - | - |
+| CASH_IN | FILLED | `debit += size*price` | `holdings += size*price` | `credit += size*price` | `limit += size*price` | - | - | - | - |
+| CASH_OUT | FILLED | `debit -= size*price` | `holdings -= size*price` | `credit -= size*price` | `limit -= size*price` | - | - | - | - |
 
 ---
 

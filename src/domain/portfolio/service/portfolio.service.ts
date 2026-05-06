@@ -37,14 +37,12 @@ export class PortfolioService {
     if(!arsStatus) {
       throw new Error('ARS instrument status not found');
     }
-    const cash = arsStatus.debit;
     const positions = this.calculatePositions(instrumentMap, orders, marketData, instruments);
     const positionsValue = positions.reduce((sum, p) => sum + p.marketValue, 0);
-    const totalValue = cash + positionsValue;
-
+    
     return {
-      totalValue,
-      availableCash: cash,
+      totalValue: arsStatus.debit + positionsValue,
+      availableCash: arsStatus.credit,
       positions
     };
   }
@@ -58,6 +56,7 @@ export class PortfolioService {
     const positions: Position[] = [];
     const latestPrices = MarketPricesResolver.getLatestPricesMap(orders, marketData);
 
+    console.log(instrumentMap)
     for (const [instrumentId, status] of instrumentMap) {
       if (status.holdings === 0) continue;
       const instrument = instruments.find((i: any) => i.id === instrumentId);

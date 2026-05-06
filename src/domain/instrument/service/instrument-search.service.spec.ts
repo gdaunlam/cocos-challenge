@@ -2,35 +2,37 @@ const data = require('../../../../data/data.json');
 import { InstrumentSearchService } from './instrument-search.service';
 import { InstrumentRepositoryImpl } from '../repository/instrument.repository.impl';
 import { Instrument, InstrumentType } from '../../../database/entities/instrument.entity';
+import { SearchBy } from '../controller/instrument-search.query.dto';
 
 const instruments = data.instruments as Instrument[];
 
-type SearchResult = { instrument: Instrument; score: number };
+type SearchResult = { instrument: Instrument; score: number; total: number };
 
 const createMockRepository = (overrides?: Partial<InstrumentRepositoryImpl>): InstrumentRepositoryImpl => ({
   findAll: jest.fn().mockResolvedValue(instruments),
-  findWithSimilarity: jest.fn().mockImplementation((query: string, searchBy: 'ticker' | 'name' | 'both', type?: InstrumentType, limit = 10, offset = 0) => {
-    const q = query.toLowerCase();
+  findWithSimilarity: jest.fn().mockImplementation((q: string, searchBy: SearchBy, type?: InstrumentType, limit = 10, offset = 0) => {
+    const qLower = q.toLowerCase();
     const scored = instruments
       .filter(i => !type || i.type === type)
       .map(i => {
         let score = 0;
-        if (searchBy === 'ticker' || searchBy === 'both') {
-          if (i.ticker.toLowerCase() === q) score = 1;
-          else if (i.ticker.toLowerCase().startsWith(q)) score = 0.9;
-          else if (i.ticker.toLowerCase().includes(q)) score = 0.6;
+        if (searchBy === SearchBy.TICKER || searchBy === SearchBy.BOTH) {
+          if (i.ticker.toLowerCase() === qLower) score = 1;
+          else if (i.ticker.toLowerCase().startsWith(qLower)) score = 0.9;
+          else if (i.ticker.toLowerCase().includes(qLower)) score = 0.6;
         }
-        if (searchBy === 'name' || searchBy === 'both') {
-          if (i.name.toLowerCase() === q) score = Math.max(score, 1);
-          else if (i.name.toLowerCase().startsWith(q)) score = Math.max(score, 0.9);
-          else if (i.name.toLowerCase().includes(q)) score = Math.max(score, 0.6);
+        if (searchBy === SearchBy.NAME || searchBy === SearchBy.BOTH) {
+          if (i.name.toLowerCase() === qLower) score = Math.max(score, 1);
+          else if (i.name.toLowerCase().startsWith(qLower)) score = Math.max(score, 0.9);
+          else if (i.name.toLowerCase().includes(qLower)) score = Math.max(score, 0.6);
         }
-        return { instrument: i, score };
+        return { instrument: i, score, total: 0 };
       })
       .filter((r: SearchResult) => r.score > 0)
-      .sort((a: SearchResult, b: SearchResult) => b.score - a.score)
-      .slice(offset, offset + limit);
-    return Promise.resolve(scored);
+      .sort((a: SearchResult, b: SearchResult) => b.score - a.score);
+    const total = scored.length;
+    const paginated = scored.slice(offset, offset + limit).map(r => ({ ...r, total }));
+    return Promise.resolve(paginated);
   }),
   ...overrides,
 } as unknown as InstrumentRepositoryImpl);
@@ -49,7 +51,7 @@ describe('InstrumentSearchService', () => {
   });
 
   it('should return results for valid query', async () => {
-    const result = await service.search({ query: 'gal', page: 1, limit: 10 });
+    const result = await service.search({ q: 'gal', page: 1, limit: 10 });
 
     expect(result.results.length).toBeGreaterThan(0);
     expect(result.pagination.page).toBe(1);
@@ -57,7 +59,7 @@ describe('InstrumentSearchService', () => {
   });
 
   it('should order results by score descending', async () => {
-    const result = await service.search({ query: 'banco', page: 1, limit: 10 });
+    const result = await service.search({ q: 'banco', page: 1, limit: 10 });
 
     for (let i = 1; i < result.results.length; i++) {
       expect(result.results[i - 1].score).toBeGreaterThanOrEqual(result.results[i].score);
@@ -65,7 +67,7 @@ describe('InstrumentSearchService', () => {
   });
 
   it('should filter by type when provided', async () => {
-    const result = await service.search({ query: 'arg', page: 1, limit: 10, type: InstrumentType.MONEDA });
+    const result = await service.search({ q: 'arg', page: 1, limit: 10, type: InstrumentType.MONEDA });
 
     for (const r of result.results) {
       expect(r.type).toBe(InstrumentType.MONEDA);
@@ -73,29 +75,14 @@ describe('InstrumentSearchService', () => {
   });
 
   it('should paginate results correctly', async () => {
-    const result = await service.search({ query: 'arg', page: 1, limit: 2 });
+    const result = await service.search({ q: 'arg', page: 1, limit: 2 });
 
     expect(result.results.length).toBe(2);
     expect(result.pagination.totalPages).toBeGreaterThanOrEqual(1);
   });
 
-  it('should throw error for query shorter than 3 characters', async () => {
-    await expect(service.search({ query: 'ab', page: 1, limit: 10 }))
-      .rejects.toThrow('query must be at least 3 characters');
-  });
-
-  it('should throw error for page <= 0', async () => {
-    await expect(service.search({ query: 'abc', page: 0, limit: 10 }))
-      .rejects.toThrow('page must be a positive number');
-  });
-
-  it('should throw error for limit <= 0', async () => {
-    await expect(service.search({ query: 'abc', page: 1, limit: 0 }))
-      .rejects.toThrow('limit must be a positive number');
-  });
-
   it('should search by ticker only when searchBy=ticker', async () => {
-    const result = await service.search({ query: 'ggal', page: 1, limit: 10, searchBy: 'ticker' });
+    const result = await service.search({ q: 'ggal', page: 1, limit: 10, searchBy: SearchBy.TICKER });
 
     expect(result.results.length).toBeGreaterThan(0);
     const topResult = result.results[0];
@@ -103,7 +90,7 @@ describe('InstrumentSearchService', () => {
   });
 
   it('should search by name only when searchBy=name', async () => {
-    const result = await service.search({ query: 'galicia', page: 1, limit: 10, searchBy: 'name' });
+    const result = await service.search({ q: 'galicia', page: 1, limit: 10, searchBy: SearchBy.NAME });
 
     expect(result.results.length).toBeGreaterThan(0);
     const topResult = result.results[0];
@@ -111,7 +98,7 @@ describe('InstrumentSearchService', () => {
   });
 
   it('should use weighted scoring for searchBy=both (default)', async () => {
-    const result = await service.search({ query: 'ggal', page: 1, limit: 10 });
+    const result = await service.search({ q: 'ggal', page: 1, limit: 10 });
 
     expect(result.results.length).toBeGreaterThan(0);
     const topResult = result.results[0];

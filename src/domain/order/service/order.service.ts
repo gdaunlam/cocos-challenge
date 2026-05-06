@@ -3,7 +3,7 @@ import { OrderRepositoryImpl, SaveOrderDto } from '../repository/order.repositor
 import { MarketPricesResolver } from '../../shared/market-prices-resolver';
 import { PortfolioStatusBuilder } from '../../shared/portfolio-status-builder';
 import { cacheService } from '../../shared/cache';
-import { Order, OrderType, Side, Status } from '../../../database/entities/order.entity';
+import { OrderType, Side, Status } from '../../../database/entities/order.entity';
 import { CreateOrderInput, CreateOrderResult } from '../controller/order.interface';
 
 import { MarketDataRepositoryImpl } from '../../marketdata/repository/marketdata.repository.impl';
@@ -19,16 +19,8 @@ export class OrderService {
   ) {}
 
   async createOrder(input: CreateOrderInput): Promise<CreateOrderResult> {
-    if (!input.instrumentId || input.instrumentId <= 0) {
-      throw new Error('instrumentId must be a positive number');
-    }
-    if (!input.userId || input.userId <= 0) {
-      throw new Error('userId must be a positive number');
-    }
-
     const hasQuantity = input.quantity !== undefined && input.quantity !== null;
     const hasAmount = input.amount !== undefined && input.amount !== null;
-
     if (!hasQuantity && !hasAmount) {
       throw new Error('quantity or amount is required');
     }
@@ -37,7 +29,6 @@ export class OrderService {
     }
 
     const isMarket = input.price === undefined || input.price === null;
-
     if (!isMarket && input.price! <= 0) {
       throw new Error('Price must be greater than 0');
     }
@@ -73,7 +64,7 @@ export class OrderService {
     const targetStatus = processor.getInstrumentStatus(input.instrumentId);
 
     const totalCost = effectiveSize * effectivePrice;
-    let status: Order['status'] = Status.REJECTED;
+    let status: Status = Status.REJECTED;
 
     if (input.side === Side.BUY && arsStatus && totalCost <= arsStatus.credit) {
       status = isMarket ? Status.FILLED : Status.NEW;

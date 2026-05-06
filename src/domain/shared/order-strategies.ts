@@ -12,71 +12,69 @@ export type OrderStrategy = (
 ) => void;
 
 export const strategies: Record<string, OrderStrategy> = {
-  BUY_NEW: (order, context) => {
+  BUY_NEW: (order: Order, context: StrategyContext) => {
     if (!context.exchanged) return;
     context.exchanged.credit -= order.size * order.price;
-    context.exchanged.limit -= order.size;
+    context.exchanged.limit -= order.size * order.price;
   },
 
-  BUY_FILLED: (order, context) => {
+  BUY_FILLED: (order: Order, context: StrategyContext) => {
     if (!context.exchanged) return;
     context.target.debit += order.size * order.price;
-    context.target.holdings += order.size;
     context.target.credit += order.size * order.price;
+    context.target.holdings += order.size;
     context.target.limit += order.size;
     context.exchanged.debit -= order.size * order.price;
-    context.exchanged.holdings -= order.size;
+    context.exchanged.holdings -= order.size * order.price;
+    context.exchanged.credit -= order.size * order.price;
+    context.exchanged.limit -= order.size * order.price;
   },
 
-  BUY_CANCELLED: (order, context) => {
-    if (!context.exchanged) return;
-    context.exchanged.credit += order.size * order.price;
-    context.exchanged.limit += order.size;
+  BUY_CANCELLED: (_order: Order, _context: StrategyContext) => {
+    // No action needed
   },
 
-  BUY_REJECTED: (order, context) => {
-    if (!context.exchanged) return;
-    context.exchanged.credit += order.size * order.price;
-    context.exchanged.limit += order.size;
+  BUY_REJECTED: (_order: Order, _context: StrategyContext) => {
+    // No action needed
   },
 
-  SELL_NEW: (order, context) => {
+  SELL_NEW: (order: Order, context: StrategyContext) => {
+    if (!context.target) return;
     context.target.credit -= order.size * order.price;
-    context.target.limit -= order.size;
+    context.target.limit -= order.size * order.price;
   },
 
-  SELL_FILLED: (order, context) => {
+  SELL_FILLED: (order: Order, context: StrategyContext) => {
     if (!context.exchanged) return;
     context.target.debit -= order.size * order.price;
+    context.target.credit -= order.size * order.price;
     context.target.holdings -= order.size;
     context.target.limit -= order.size;
     context.exchanged.debit += order.size * order.price;
-    context.exchanged.holdings += order.size;
+    context.exchanged.holdings += order.size * order.price;
     context.exchanged.credit += order.size * order.price;
-    context.exchanged.limit += order.size;
+    context.exchanged.limit += order.size * order.price;
   },
 
-  SELL_CANCELLED: (order, context) => {
+  SELL_CANCELLED: (_order: Order, _context: StrategyContext) => {
+    // No action needed
+  },
+
+  SELL_REJECTED: (_order: Order, _context: StrategyContext) => {
+    // No action needed
+  },
+
+  CASH_IN_FILLED: (order: Order, context: StrategyContext) => {
+    context.target.debit += order.size * order.price;
+    context.target.holdings += order.size * order.price;
     context.target.credit += order.size * order.price;
-    context.target.limit += order.size;
+    context.target.limit += order.size * order.price;
   },
 
-  SELL_REJECTED: (order, context) => {
-    context.target.credit += order.size * order.price;
-    context.target.limit += order.size;
-  },
-
-  CASH_IN_FILLED: (order, context) => {
-    context.target.debit += order.size;
-    context.target.holdings += order.size;
-    context.target.credit += order.size;
-    context.target.limit += order.size;
-  },
-
-  CASH_OUT_FILLED: (order, context) => {
-    context.target.debit -= order.size;
-    context.target.holdings -= order.size;
-    context.target.credit -= order.size;
-    context.target.limit -= order.size;
+  CASH_OUT_FILLED: (order: Order, context: StrategyContext) => {
+    context.target.debit -= order.size * order.price;
+    context.target.holdings -= order.size * order.price;
+    context.target.credit -= order.size * order.price;
+    context.target.limit -= order.size * order.price;
   }
 };

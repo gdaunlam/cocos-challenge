@@ -1,25 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { InstrumentRepositoryImpl } from '../repository/instrument.repository.impl';
 import { cached } from '../../shared/cache';
-import { SearchInstrumentsInput, SearchInstrumentsOutput } from '../controller/instrument-search.interface';
+import { SearchInstrumentsOutput } from '../controller/instrument-search.interface';
+import { SearchBy, SearchInstrumentsQueryDto } from '../controller/instrument-search.query.dto';
 
-type SearchBy = 'ticker' | 'name' | 'both';
 
 @Injectable()
 export class InstrumentSearchService {
   constructor(private readonly repository: InstrumentRepositoryImpl) {}
 
-  @cached('search', (input: SearchInstrumentsInput) =>
-    `search:${input.query}:${input.type ?? 'all'}:${input.searchBy ?? 'both'}:${input.page}:${input.limit}`
+  @cached('search', (input: SearchInstrumentsQueryDto) =>
+    `search:${input.q}:${input.type ?? 'all'}:${input.searchBy ?? SearchBy.BOTH}:${input.page}:${input.limit}`
   )
-  async search(input: SearchInstrumentsInput): Promise<SearchInstrumentsOutput> {
-    this.validateInput(input);
-    const searchBy: SearchBy = input.searchBy ?? 'both';
+  async search(input: SearchInstrumentsQueryDto): Promise<SearchInstrumentsOutput> {
+    const searchBy: SearchBy = input.searchBy ?? SearchBy.BOTH;
     const limit = input.limit;
     const offset = (input.page - 1) * input.limit;
 
     const searchResults = await this.repository.findWithSimilarity(
-      input.query,
+      input.q,
       searchBy,
       input.type,
       limit,
@@ -34,36 +33,17 @@ export class InstrumentSearchService {
       score: r.score,
     }));
 
-    const totalResults = await this.repository.findWithSimilarity(
-      input.query,
-      searchBy,
-      input.type,
-      10000,
-      0,
-    );
-    const total = totalResults.length;
+    const total = searchResults[0]?.total ?? 0;
     const totalPages = Math.ceil(total / limit);
 
     return {
       results,
       pagination: {
         page: input.page,
-        limit,
+        limit: input.limit,
         total,
         totalPages,
       },
     };
-  }
-
-  private validateInput(input: SearchInstrumentsInput): void {
-    if (!input.query || input.query.length < 3) {
-      throw new Error('query must be at least 3 characters');
-    }
-    if (input.page <= 0) {
-      throw new Error('page must be a positive number');
-    }
-    if (input.limit <= 0) {
-      throw new Error('limit must be a positive number');
-    }
   }
 }
