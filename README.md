@@ -8,7 +8,7 @@ docker compose up -d && npm run dev
 
 - El proyecto cuenta con migraciones solo para development que agregan tablas y datos.
 - Para conectar la API con una BD externa, usar `prod` o `stg` donde no se ejecutan migraciones sobre la BD.
-- Si conecta una BD externa sobre `stg`, probablemente fallarán las migraciones y generarán inconsistencias.
+- Si conecta una BD externa sobre `development`, probablemente fallarán las migraciones y generarán inconsistencias.
 
 ## Cambios sobre la BD
 
