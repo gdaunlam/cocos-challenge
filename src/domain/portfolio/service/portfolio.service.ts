@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PortfolioRepositoryImpl } from '../repository/portfolio.repository.impl';
 import { PortfolioStatusBuilder } from '../../shared/portfolio-status-builder';
 import { MarketPricesResolver } from '../../shared/market-prices-resolver';
@@ -27,22 +27,22 @@ export class PortfolioService {
 
     const arsInstrument = instruments.find(i => i.type === InstrumentType.MONEDA);
     if (!arsInstrument) {
-      throw new Error('ARS instrument not found');
+      throw new NotFoundException('ARS instrument not found');
     }
 
     const processor = new PortfolioStatusBuilder(arsInstrument.id);
     const instrumentMap = processor.process(orders);
 
     const arsStatus = instrumentMap.get(arsInstrument.id);
-    if (!arsStatus) {
-      throw new Error('ARS instrument status not found');
-    }
+    const arsDebit = arsStatus?.debit || 0;
+    const arsCredit = arsStatus?.credit || 0;
+
     const positions = this.calculatePositions(instrumentMap, orders, marketData, instruments);
     const positionsValue = positions.reduce((sum, p) => sum + p.marketValue, 0);
 
     return {
-      totalValue: arsStatus.debit + positionsValue,
-      availableCash: arsStatus.credit,
+      totalValue: arsDebit + positionsValue,
+      availableCash: arsCredit,
       positions
     };
   }

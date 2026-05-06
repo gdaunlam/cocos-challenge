@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { OrderRepositoryImpl, SaveOrderDto } from '../repository/order.repository.impl';
 import { MarketPricesResolver } from '../../shared/market-prices-resolver';
 import { PortfolioStatusBuilder } from '../../shared/portfolio-status-builder';
@@ -22,15 +22,15 @@ export class OrderService {
     const hasQuantity = input.quantity !== undefined && input.quantity !== null;
     const hasAmount = input.amount !== undefined && input.amount !== null;
     if (!hasQuantity && !hasAmount) {
-      throw new Error('quantity or amount is required');
+      throw new BadRequestException('quantity or amount is required');
     }
     if (hasQuantity && hasAmount) {
-      throw new Error('cannot specify both quantity and amount');
+      throw new BadRequestException('cannot specify both quantity and amount');
     }
 
     const isMarket = input.price === undefined || input.price === null;
     if (!isMarket && input.price! <= 0) {
-      throw new Error('Price must be greater than 0');
+      throw new BadRequestException('Price must be greater than 0');
     }
 
     const [orders, marketData, instruments] = await Promise.all([
@@ -48,12 +48,12 @@ export class OrderService {
       : Math.floor(input.amount! / effectivePrice);
 
     if (effectiveSize <= 0) {
-      throw new Error('Order size must be greater than 0');
+      throw new BadRequestException('Order size must be greater than 0');
     }
 
     const arsInstrument = instruments.find(i => i.type === InstrumentType.MONEDA);
     if (!arsInstrument) {
-      throw new Error('ARS instrument not found');
+      throw new BadRequestException('ARS instrument not found');
     }
 
     const userOrders = orders.filter(o => o.userId === input.userId);

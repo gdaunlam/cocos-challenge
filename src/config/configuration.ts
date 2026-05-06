@@ -1,6 +1,7 @@
 import { registerAs } from '@nestjs/config';
 import { plainToClass } from 'class-transformer';
 import { Environment, IEnvironmentConfig } from './environment';
+import { InternalServerErrorException } from '@nestjs/common';
 
 class EnvironmentVariables {
   NODE_ENV!: string;
@@ -12,7 +13,7 @@ export const configuration = registerAs('environment', (): IEnvironmentConfig =>
   const nodeEnv = (process.env.NODE_ENV || Environment.Development) as Environment;
 
   if (!Object.values(Environment).includes(nodeEnv)) {
-    throw new Error(`Invalid NODE_ENV: ${nodeEnv}`);
+    throw new InternalServerErrorException(`Invalid NODE_ENV: ${nodeEnv}`);
   }
 
   const envVars = plainToClass(EnvironmentVariables, {

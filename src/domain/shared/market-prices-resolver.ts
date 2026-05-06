@@ -1,5 +1,6 @@
 import { Order, Status } from '../../database/entities/order.entity';
 import { MarketData } from '../../database/entities/marketdata.entity';
+import { InternalServerErrorException } from '@nestjs/common';
 
 export class MarketPricesResolver {
   static getMarketPrice(
@@ -10,7 +11,7 @@ export class MarketPricesResolver {
     const priceMap = this.getLatestPricesMap(orders, marketData);
     const price = priceMap.get(instrumentId);
     if (price === undefined || price === null) {
-      throw new Error('No market price available for instrument');
+      throw new InternalServerErrorException('No market price available for instrument');
     }
     return price;
   }

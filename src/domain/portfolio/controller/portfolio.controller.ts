@@ -1,7 +1,8 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { PortfolioService } from '../service/portfolio.service';
 import { PortfolioBody } from './portfolio.interface';
+import { PortfolioParamsDto } from './portfolio.params.dto';
 
 @ApiTags('Portfolio')
 @Controller('portfolio')
@@ -10,7 +11,9 @@ export class PortfolioController {
 
   @Get(':userId')
   @ApiResponse({ status: 200, description: 'OK' })
-  async calculatePortfolio(@Param('userId', ParseIntPipe) userId: number): Promise<PortfolioBody> {
-    return this.portfolioService.calculatePortfolio(userId);
+  async calculatePortfolio(
+    @Param() params: PortfolioParamsDto,
+  ): Promise<PortfolioBody> {
+    return this.portfolioService.calculatePortfolio(params.userId);
   }
 }
