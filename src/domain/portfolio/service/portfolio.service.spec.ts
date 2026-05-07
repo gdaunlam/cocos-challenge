@@ -7,13 +7,21 @@ import { cacheService } from '../../shared/cache';
 import { Order } from '../../../database/entities/order.entity';
 import { Instrument } from '../../../database/entities/instrument.entity';
 import { MarketData } from '../../../database/entities/marketdata.entity';
+import { User } from '../../../database/entities/user.entity';
+import { UserRepositoryImpl } from '../../user/repository/user.repository.impl';
 
+const users = data.users as User[];
 const orders = data.orders as Order[];
 const instruments = data.instruments as Instrument[];
 const marketData = data.marketdata as MarketData[];
 
+const createMockUserRepository = (overrides?: Partial<UserRepositoryImpl>): UserRepositoryImpl => ({
+  getById: jest.fn((userId: number) => Promise.resolve(users.find((u) => u.id === userId) || null)),
+  ...overrides,
+} as unknown as UserRepositoryImpl);
+
 const createMockPortfolioRepository = (overrides?: Partial<PortfolioRepositoryImpl>): PortfolioRepositoryImpl => ({
-  findOrdersByUserId: jest.fn().mockResolvedValue(orders.filter(o => o.userId === 1)),
+  findOrdersByUserId: jest.fn(userId => Promise.resolve(orders.filter(o => o.userId === userId))),
   ...overrides,
 } as unknown as PortfolioRepositoryImpl);
 
@@ -30,12 +38,14 @@ describe('PortfolioService', () => {
   let mockPortfolioRepository: PortfolioRepositoryImpl;
   let mockInstrumentRepository: InstrumentRepositoryImpl;
   let mockMarketDataRepository: MarketDataRepositoryImpl;
+  let mockUserRepository: UserRepositoryImpl;
 
   beforeEach(() => {
     cacheService.clear();
     mockPortfolioRepository = createMockPortfolioRepository();
     mockInstrumentRepository = createMockInstrumentRepository();
     mockMarketDataRepository = createMockMarketDataRepository();
+    mockUserRepository = createMockUserRepository();
   });
 
   afterEach(() => {
@@ -46,7 +56,8 @@ describe('PortfolioService', () => {
     const service = new PortfolioService(
       mockPortfolioRepository,
       mockInstrumentRepository,
-      mockMarketDataRepository
+      mockMarketDataRepository,
+      mockUserRepository
     );
     const result = await service.calculatePortfolio(1);
 
@@ -69,5 +80,16 @@ describe('PortfolioService', () => {
     expect(bma).toBeDefined();
     expect(bma!.quantity).toBe(-10);
     expect(bma!.marketValue).toBe(-15300);
+  });
+
+  it('should return user not found when user does not exist', async () => {
+    const service = new PortfolioService(
+      mockPortfolioRepository,
+      mockInstrumentRepository,
+      mockMarketDataRepository,
+      mockUserRepository
+    );
+
+    await expect(service.calculatePortfolio(999)).rejects.toThrow('User not found');
   });
 });

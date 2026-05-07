@@ -64,4 +64,8 @@ export class InstrumentRepositoryImpl {
       total: parseInt(row.total, 10),
     }));
   }
+
+  async getById(id: number): Promise<Instrument | null> {
+    return this.repository.findOne({ where: { id } });
+  }
 }

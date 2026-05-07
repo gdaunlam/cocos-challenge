@@ -8,6 +8,7 @@ import { Position, PortfolioBody } from '../controller/portfolio.interface';
 import { InstrumentRepositoryImpl } from '../../instrument/repository/instrument.repository.impl';
 import { MarketDataRepositoryImpl } from '../../marketdata/repository/marketdata.repository.impl';
 import { InstrumentType } from '../../../database/entities/instrument.entity';
+import { UserRepositoryImpl } from '../../user/repository/user.repository.impl';
 
 @Injectable()
 export class PortfolioService {
@@ -15,10 +16,16 @@ export class PortfolioService {
     private readonly portfolioRepository: PortfolioRepositoryImpl,
     private readonly instrumentRepository: InstrumentRepositoryImpl,
     private readonly marketDataRepository: MarketDataRepositoryImpl,
+    private readonly userRepository: UserRepositoryImpl,
   ) { }
 
   @cached('portfolio', function (this: PortfolioService, userId: number) { return `portfolio:${userId}`; })
   async calculatePortfolio(userId: number): Promise<PortfolioBody> {
+    const user = await this.userRepository.getById(userId);
+    if(!user) {
+      throw new NotFoundException('User not found');
+    }
+
     const [orders, instruments, marketData] = await Promise.all([
       this.portfolioRepository.findOrdersByUserId(userId),
       this.instrumentRepository.findAll(),

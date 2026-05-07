@@ -9,6 +9,7 @@ import { CreateOrderInput, CreateOrderResult } from '../controller/order.interfa
 import { MarketDataRepositoryImpl } from '../../marketdata/repository/marketdata.repository.impl';
 import { InstrumentRepositoryImpl } from '../../instrument/repository/instrument.repository.impl';
 import { InstrumentType } from '../../../database/entities/instrument.entity';
+import { UserRepositoryImpl } from '../../user/repository/user.repository.impl';
 
 @Injectable()
 export class OrderService {
@@ -16,9 +17,18 @@ export class OrderService {
     private readonly orderRepository: OrderRepositoryImpl,
     private readonly instrumentRepository: InstrumentRepositoryImpl,
     private readonly marketDataRepository: MarketDataRepositoryImpl,
+    private readonly userRepository: UserRepositoryImpl,
   ) {}
 
   async createOrder(input: CreateOrderInput): Promise<CreateOrderResult> {
+    const user = await this.userRepository.getById(input.userId);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    const instrument = await this.instrumentRepository.getById(input.instrumentId);
+    if (!instrument) {
+      throw new BadRequestException('Instrument not found');
+    }
     const hasQuantity = input.quantity !== undefined && input.quantity !== null;
     const hasAmount = input.amount !== undefined && input.amount !== null;
     if (!hasQuantity && !hasAmount) {

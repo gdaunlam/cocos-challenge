@@ -7,10 +7,13 @@ import { cacheService } from '../../shared/cache';
 import { Order, OrderType, Side, Status } from '../../../database/entities/order.entity';
 import { MarketData } from '../../../database/entities/marketdata.entity';
 import { Instrument } from '../../../database/entities/instrument.entity';
+import { UserRepositoryImpl } from '../../user/repository/user.repository.impl';
+import { User } from '../../../database/entities/user.entity';
 
 const orders = data.orders as Order[];
 const marketData = data.marketdata as MarketData[];
 const instruments = data.instruments as Instrument[];
+const users = data.users as User[];
 
 const createMockOrderRepository = (overrides?: Partial<OrderRepositoryImpl>): OrderRepositoryImpl => ({
   findAll: jest.fn().mockResolvedValue(orders),
@@ -18,7 +21,13 @@ const createMockOrderRepository = (overrides?: Partial<OrderRepositoryImpl>): Or
   ...overrides,
 } as unknown as OrderRepositoryImpl);
 
+const createMockUserRepository = (overrides?: Partial<UserRepositoryImpl>): UserRepositoryImpl => ({
+  getById: jest.fn((userId: number) => Promise.resolve(users.find((u) => u.id === userId) || null)),
+  ...overrides,
+} as unknown as UserRepositoryImpl);
+
 const createMockInstrumentRepository = (): InstrumentRepositoryImpl => ({
+  getById: jest.fn((instrumentId: number) => Promise.resolve(instruments.find((i) => i.id === instrumentId) || null)),
   findAll: jest.fn().mockResolvedValue(instruments),
   findWithSimilarity: jest.fn().mockResolvedValue([]),
 } as unknown as InstrumentRepositoryImpl);
@@ -31,9 +40,11 @@ describe('OrderService', () => {
   let mockOrderRepository: OrderRepositoryImpl;
   let mockInstrumentRepository: InstrumentRepositoryImpl;
   let mockMarketDataRepository: MarketDataRepositoryImpl;
+  let mockUserRepository: UserRepositoryImpl;
 
   beforeEach(() => {
     cacheService.clear();
+    mockUserRepository = createMockUserRepository();
     mockOrderRepository = createMockOrderRepository();
     mockInstrumentRepository = createMockInstrumentRepository();
     mockMarketDataRepository = createMockMarketDataRepository();
@@ -48,7 +59,8 @@ describe('OrderService', () => {
       const service = new OrderService(
         mockOrderRepository,
         mockInstrumentRepository,
-        mockMarketDataRepository
+        mockMarketDataRepository,
+        mockUserRepository
       );
 
       const result = await service.createOrder({
@@ -68,7 +80,8 @@ describe('OrderService', () => {
       const service = new OrderService(
         mockOrderRepository,
         mockInstrumentRepository,
-        mockMarketDataRepository
+        mockMarketDataRepository,
+        mockUserRepository
       );
 
       const result = await service.createOrder({
@@ -88,7 +101,8 @@ describe('OrderService', () => {
       const service = new OrderService(
         mockOrderRepository,
         mockInstrumentRepository,
-        mockMarketDataRepository
+        mockMarketDataRepository,
+        mockUserRepository
       );
 
       const result = await service.createOrder({
@@ -106,7 +120,8 @@ describe('OrderService', () => {
       const service = new OrderService(
         mockOrderRepository,
         mockInstrumentRepository,
-        mockMarketDataRepository
+        mockMarketDataRepository,
+        mockUserRepository
       );
 
       const result = await service.createOrder({
@@ -129,7 +144,8 @@ describe('OrderService', () => {
       const service = new OrderService(
         mockOrderRepository,
         mockInstrumentRepository,
-        mockMarketDataRepository
+        mockMarketDataRepository,
+        mockUserRepository
       );
 
       const result = await service.createOrder({
@@ -149,7 +165,8 @@ describe('OrderService', () => {
       const service = new OrderService(
         mockOrderRepository,
         mockInstrumentRepository,
-        mockMarketDataRepository
+        mockMarketDataRepository,
+        mockUserRepository
       );
 
       const result = await service.createOrder({
@@ -169,7 +186,8 @@ describe('OrderService', () => {
       const service = new OrderService(
         mockOrderRepository,
         mockInstrumentRepository,
-        mockMarketDataRepository
+        mockMarketDataRepository,
+        mockUserRepository
       );
 
       const result = await service.createOrder({
@@ -185,11 +203,41 @@ describe('OrderService', () => {
   });
 
   describe('input validation', () => {
+    it('should reject when user not found', async () => {
+      const service = new OrderService(
+        mockOrderRepository,
+        mockInstrumentRepository,
+        mockMarketDataRepository,
+        mockUserRepository
+      );
+
+      await expect(service.createOrder({
+        instrumentId: 47,
+        userId: 999,
+        side: Side.BUY,
+      })).rejects.toThrow('User not found');
+    });
+    it('should reject when instrument not found', async () => {
+      const service = new OrderService(
+        mockOrderRepository,
+        mockInstrumentRepository,
+        mockMarketDataRepository,
+        mockUserRepository
+      );
+
+      await expect(service.createOrder({
+        instrumentId: 999,
+        userId: 1,
+        side: Side.BUY,
+      })).rejects.toThrow('Instrument not found');
+    });
+
     it('should reject when neither quantity nor amount provided', async () => {
       const service = new OrderService(
         mockOrderRepository,
         mockInstrumentRepository,
-        mockMarketDataRepository
+        mockMarketDataRepository,
+        mockUserRepository
       );
 
       await expect(service.createOrder({
@@ -203,7 +251,8 @@ describe('OrderService', () => {
       const service = new OrderService(
         mockOrderRepository,
         mockInstrumentRepository,
-        mockMarketDataRepository
+        mockMarketDataRepository,
+        mockUserRepository
       );
 
       await expect(service.createOrder({
@@ -219,7 +268,8 @@ describe('OrderService', () => {
       const service = new OrderService(
         mockOrderRepository,
         mockInstrumentRepository,
-        mockMarketDataRepository
+        mockMarketDataRepository,
+        mockUserRepository
       );
 
       await expect(service.createOrder({
@@ -235,7 +285,8 @@ describe('OrderService', () => {
       const service = new OrderService(
         mockOrderRepository,
         mockInstrumentRepository,
-        mockMarketDataRepository
+        mockMarketDataRepository,
+        mockUserRepository
       );
 
       await expect(service.createOrder({
@@ -251,11 +302,12 @@ describe('OrderService', () => {
       const service = new OrderService(
         mockOrderRepository,
         mockInstrumentRepository,
-        mockMarketDataRepository
+        mockMarketDataRepository,
+        mockUserRepository
       );
 
       await expect(service.createOrder({
-        instrumentId: 9999,
+        instrumentId: 67,
         userId: 1,
         side: Side.BUY,
         quantity: 10,
@@ -268,7 +320,8 @@ describe('OrderService', () => {
       const service = new OrderService(
         mockOrderRepository,
         mockInstrumentRepository,
-        mockMarketDataRepository
+        mockMarketDataRepository,
+        mockUserRepository
       );
 
       const result = await service.createOrder({
